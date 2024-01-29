@@ -292,7 +292,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "XX"
+algorithm_code = "AS"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -352,6 +352,26 @@ added_note = ""
 ############ TOUR-FILE PRODUCED BY THIS CODE.
 ############
 ############ END OF SECTOR 9 (IGNORE THIS COMMENT)
+
+# Keep track of the best tour and its length
+tour = {}
+tour_length = 0
+
+
+# Print distance matrix
+for row in dist_matrix:
+    for item in row:
+        print(f"{item:2}", end=" ")
+    print()
+
+# 'tour' needed to keep track of best tour as list of unique ints {0, 1, ..., 'num_cities' - 1}
+# 'tour_length' needed to keep track of integer length of that tour
+
+# Need to define a transition function
+
+# Maybe next try printing this as a 2d matrix to visualise distances between cities
+
+
 
 
 

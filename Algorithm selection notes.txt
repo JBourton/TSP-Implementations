@@ -1,0 +1,50 @@
+--------------------------------------------------------------
+CHOICE 1: A* SEARCH W/ ITERATIVE DEEPENING (8 points)
+--------------------------------------------------------------
+A* search uses an evaluation function to estimate the distance to the goal node.
+Certain nodes are prioritised over others.
+A* search (& w/ iterative deepening) guarentee all nodes within a certain depth are explored).
+The heuristic measure is the estimated cost to get from a node on the fringe to a goal state.
+
+Iterative deepening performs a depth-limited search: It starts at a shallow depth and gradually increases depth limit w/ each iteration until goal is found.
+At each iteration, the depth limit is set to a predefined amount to prevent the search going too deep in the search space.
+This reduced memory requirements.
+It's used with A* search by using the evaluation function to prioritise nodes within the depth limit to explore.
+It may have increasing overhead but works well when depth of solution is unknown or varies.
+
+These 2 things should be implemented SEPERATELY. This will allow debugging and modular design, plus give me a solid algorithm to fall back on if I run out of time.
+
+Definitions:
+- A* Score: For each node, the cost of path from source to that node + heuristic (estimated cost from that node to target)
+
+Need to plan data structures. Information captured:
+- Visited: A list of visited nodes + their A* score
+- Best possible tour so far (may need to terminate within 1 min)
+- Heuristic function: Should satisfy triangle equality - estimated cost from one city to another city plus the estimated cost from that 
+  city to the goal should be less than or equal to the estimated cost from the initial city to the goal. 
+  Minimum spanning tree heuristic possible.
+
+For the hueristic function, there's a slide on it and it seems like he wants us to use the content in the slides - maybe book in an office hour to discuss. It may be for GBFS though.
+
+--------------------------------------------------------------
+CHOICE 2: (GBFS?) OR Greedy Search (5 points)
+--------------------------------------------------------------
+This algorithm should be one of the 'easy' ones, but one with some easy & effective algorithmic improvements possible.
+Don't confuse it with Visit Nearest Neighbor, which just 'drills down' the tree instead of expanding the fringe - WILL loose all marks for this.
+
+If implementing GBFS, a tie-breaking metric could be chosen that potentially improves algorithmic efficiency.
+
+Note: Greedy search is 1 point less (easier) but lacks a heuristic function, which is a possible source for algorithmic improvment with a dynamic function
+
+Data structures:
+- Fringe (open nodes)
+- Visited (closed nodes)
+- Best possible tour so far (may need to terminate within 1 min)
+
+--------------------------------------------------------------
+Links
+--------------------------------------------------------------
+Tie-breaking stategy impacts in GBFS: https://www.ijcai.org/proceedings/2018/0203.pdf
+Tie-breaking for A* Search: https://www.jair.org/index.php/jair/article/view/11039
+Heuristic functions for A* & GBFS: https://proceedings.neurips.cc/paper_files/paper/2022/hash/136b9a13861308c8948cd308ccd02658-Abstract-Conference.html
+Dynamic heuristic function (want for GBFS): https://icaps20subpages.icaps-conference.org/wp-content/uploads/2020/10/PRL2020_paper_13.pdf
