@@ -1,5 +1,5 @@
 --------------------------------------------------------------
-CHOICE 1: A* SEARCH W/ ITERATIVE DEEPENING (8 points)
+OPTION 1: A* SEARCH W/ ITERATIVE DEEPENING (8 points)
 --------------------------------------------------------------
 A* search uses an evaluation function to estimate the distance to the goal node.
 Certain nodes are prioritised over others.
@@ -24,10 +24,15 @@ Need to plan data structures. Information captured:
   city to the goal should be less than or equal to the estimated cost from the initial city to the goal. 
   Minimum spanning tree heuristic possible.
 
+  The heuristic cost could possibly be stored in a matrix similar to distance matrix.
+
 For the hueristic function, there's a slide on it and it seems like he wants us to use the content in the slides - maybe book in an office hour to discuss. It may be for GBFS though.
 
+Could measure if a tour is complete by keeping a variable to track cities visited, and if that = num_cities, return the tour in the heuristic function.
+
+Note: Check that the distance matrix isn't related to the tuple lecture.
 --------------------------------------------------------------
-CHOICE 2: (GBFS?) OR Greedy Search (5 points)
+OPTION 2: (GBFS?) OR Greedy Search (5 points)
 --------------------------------------------------------------
 This algorithm should be one of the 'easy' ones, but one with some easy & effective algorithmic improvements possible.
 Don't confuse it with Visit Nearest Neighbor, which just 'drills down' the tree instead of expanding the fringe - WILL loose all marks for this.
@@ -42,9 +47,27 @@ Data structures:
 - Best possible tour so far (may need to terminate within 1 min)
 
 --------------------------------------------------------------
+OPTION 3: Hill Climbing Search
+--------------------------------------------------------------
+Hill Climbing seems like a pretty basic algorithm.
+One definite way of improving it is Random-Restart, but that may not fetch loads of complexity marks.
+Simulated annealing is an algorithm in itself so cannot be used.
+Therefore, improvments overall may be limited.
+
+--------------------------------------------------------------
+OPTION 4: Iterative Deepening
+--------------------------------------------------------------
+There seems to be more options for enhancments here.
+Alpha-Beta pruning, transposition tables and potentially more could be used
+
+--------------------------------------------------------------
 Links
 --------------------------------------------------------------
+Good overview of many of the relevant algs: https://cs.stanford.edu/people/eroberts/courses/soco/projects/2003-04/intelligent-search/inter.html
 Tie-breaking stategy impacts in GBFS: https://www.ijcai.org/proceedings/2018/0203.pdf
 Tie-breaking for A* Search: https://www.jair.org/index.php/jair/article/view/11039
 Heuristic functions for A* & GBFS: https://proceedings.neurips.cc/paper_files/paper/2022/hash/136b9a13861308c8948cd308ccd02658-Abstract-Conference.html
 Dynamic heuristic function (want for GBFS): https://icaps20subpages.icaps-conference.org/wp-content/uploads/2020/10/PRL2020_paper_13.pdf
+Iterative deepening improvments: https://www.sciencedirect.com/science/article/pii/0020019093902444
+Enhanced iterative deepening: https://webdocs.cs.ualberta.ca/~tony/TechnicalReports/tr-ri-93-120.pdf
+Improving iterative deepening for TSP: https://webdocs.cs.ualberta.ca/~tony/RecentPapers/pami94.pdf

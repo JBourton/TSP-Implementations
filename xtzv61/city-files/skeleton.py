@@ -292,7 +292,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "AS"
+algorithm_code = "ID"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -353,10 +353,11 @@ added_note = ""
 ############
 ############ END OF SECTOR 9 (IGNORE THIS COMMENT)
 
-# Keep track of the best tour and its length
-tour = {}
+# num_cities holds the number of cities
+# Keep track of the best tour (unique ints) and its length
+tour = [0]
 tour_length = 0
-
+path_depth = 0
 
 # Print distance matrix
 for row in dist_matrix:
@@ -364,15 +365,30 @@ for row in dist_matrix:
         print(f"{item:2}", end=" ")
     print()
 
-# 'tour' needed to keep track of best tour as list of unique ints {0, 1, ..., 'num_cities' - 1}
-# 'tour_length' needed to keep track of integer length of that tour
 
-# Need to define a transition function
+# Function to calculate retrieve path cost between any 2 cities
+def get_path_cost(cityA, cityB):
+    print("City A: " + str(cityA))
+    print("City B: " + str(cityB))
+    path_cost = dist_matrix[cityA][cityB]
+    return path_cost
 
-# Maybe next try printing this as a 2d matrix to visualise distances between cities
+
+# A function which, given a path, calculates the cost of travelling along it
+def calculate_total_cost(path):
+    print("Hi, in total_cost")
+    path_length = 0
+    # Get path cost for each pair of nodes
+    for i in range(0, num_cities-1):
+        path_length += get_path_cost(path[i], path[i+1])
+    return path_length
 
 
-
+print("[TEST]")
+print("Calculating path cost for the path (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)")
+test_path = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+tour_length = calculate_total_cost(test_path)
+print("Tour length is: " + str(tour_length))
 
 
 
