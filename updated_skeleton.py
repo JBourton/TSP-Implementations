@@ -177,9 +177,10 @@ path_for_city_files = os.path.join("..", "city-files")
 ############ END OF SECTOR 2 (IGNORE THIS COMMENT)
 
 ############ START OF SECTOR 3 (IGNORE THIS COMMENT)
-if os.path.isfile(path_for_city_files + "/" + input_file):
+path_to_input_file = os.path.join(path_for_city_files, input_file)
+if os.path.isfile(path_to_input_file):
     ord_range = [[32, 126]]
-    file_string = read_file_into_string(path_for_city_files + "/" + input_file, ord_range)
+    file_string = read_file_into_string(path_to_input_file, ord_range)
     file_string = remove_all_spaces(file_string)
     print("I have found and read the input file " + input_file + ":")
 else:
@@ -281,8 +282,8 @@ my_user_name = "xtzv61"
 ############
 ############ END OF SECTOR 6 (IGNORE THIS COMMENT)
 
-my_first_name = "Joshua"
-my_last_name = "Bourton"
+my_first_name = ""
+my_last_name = ""
 
 ############ START OF SECTOR 7 (IGNORE THIS COMMENT)
 ############
@@ -292,7 +293,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "ID"
+algorithm_code = "XX"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -353,32 +354,6 @@ added_note = ""
 ############
 ############ END OF SECTOR 9 (IGNORE THIS COMMENT)
 
-# num_cities holds the number of cities
-# Keep track of the best tour (unique ints) and its length
-tour = [0]
-tour_length = 0
-path_depth = 0
-
-# Print distance matrix
-for row in dist_matrix:
-    for item in row:
-        print(f"{item:2}", end=" ")
-    print()
-
-
-# Function to calculate retrieve path cost between any 2 cities
-def get_path_cost(cityA, cityB):
-    path_cost = dist_matrix[cityA][cityB]
-    return path_cost
-
-
-# A function which, given a path, calculates the cost of travelling along it
-def calculate_total_cost(path):
-    path_length = 0
-    # Get path cost for each pair of nodes
-    for i in range(0, len(path)-1):
-        path_length += get_path_cost(path[i], path[i+1])
-    return path_length
 
 
 
