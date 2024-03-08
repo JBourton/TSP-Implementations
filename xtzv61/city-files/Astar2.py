@@ -369,28 +369,6 @@ added_note = ""
 tour = []
 tour_length = 0
 
-
-# Representation of a city
-class City:
-    def __init__(self, city_id, parent_id, path_cost):
-        self.city_id = city_id
-        self.parent_id = parent_id
-        self.path_cost = path_cost
-
-    # Compare the path cost of 2 nodes by defining comparison operators
-    def __eq__(self, other):
-        if self.path_cost == other.path_cost:
-            return True
-        else:
-            return False
-
-    def __lt__(self, second_city):
-        if self.path_cost < second_city.path_cost:
-            return True
-        else:
-            return False
-
-
 # Print distance matrix
 for row in dist_matrix:
     for item in row:
@@ -404,35 +382,19 @@ def get_path_cost(cityA, cityB):
     return path_cost
 
 
-# Function to print the cities in the fringe
-def print_fringe_cities(fringe):
-    print("Cities in the fringe:")
-    fringe_cities = ""
-    for city in fringe:
-        if fringe_cities == "":
-            fringe_cities = str(city.city_id)
-        else:
-            fringe_cities = fringe_cities + ", " + str(city.city_id)
-    print(fringe_cities)
-
-
 def Djikstra_Imp():
     # Specify global variables to be modified
     global tour
     global tour_length
 
     # Set local variables
-    fringe = []
+    fringe = [0]
     total_cities = len(dist_matrix)
-    Cities_Visited = {}
-
-    # Add starting city to fringe
-    heapq.heappush(fringe, 0)
 
     # Explore the fringe until no nodes remain
     while fringe:
         # Display the fringe
-        print_fringe_cities(fringe)
+        print("Current fringe: ", fringe)
 
         # Explore the city with the lowest path cost
         current_city = heapq.heappop(fringe)

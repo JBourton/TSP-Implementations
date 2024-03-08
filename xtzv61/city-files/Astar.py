@@ -378,14 +378,17 @@ class City:
         self.path_cost = path_cost
 
     # Compare the path cost of 2 nodes by defining comparison operators
-    def __eq__(self, other):
-        if self.path_cost == other.path_cost:
+
+    # Define < operator
+    def __lt__(self, second_city):
+        if self.path_cost < second_city.path_cost:
             return True
         else:
             return False
 
-    def __lt__(self, second_city):
-        if self.path_cost < second_city.path_cost:
+    # Define == operator
+    def __eq__(self, other):
+        if self.path_cost == other.path_cost:
             return True
         else:
             return False
@@ -431,19 +434,24 @@ def print_fringe_cities(fringe):
     print(fringe_cities)
 
 
-def Djikstra_Imp():
+def AStar_Imp():
     # Specify global variables to be modified
     global tour
-    global tour_length
 
     # Set local variables
     fringe = []
     fringe_ids = []
+
+    # Populate an array with unvisited cities
     total_cities = len(dist_matrix)
+    unvisited = [x for x in range(total_cities)]
 
     # Create representation of starting city
     start_city = City(0, -1, 0)
     fringe_ids.append(start_city.city_id)
+
+    # Remove starting city from unvisited list
+    unvisited.remove(start_city.city_id)
 
     # Add starting city to fringe
     heapq.heappush(fringe, start_city)
@@ -464,12 +472,6 @@ def Djikstra_Imp():
             continue
         print(f"Current city: {current_city.city_id}")
 
-        # Append current city to the tour
-        print("Appending current city to tour")
-        tour.append(current_city.city_id)
-        tour_length += current_city.path_cost
-        print(tour)
-
         # Iterate through all cities
         for x in range(total_cities):
             # Check that each unvisited city is indeed connected to the current city
@@ -483,18 +485,28 @@ def Djikstra_Imp():
 
                 new_city = City(x, current_city.city_id,
                                 current_city.path_cost + get_path_cost(current_city.city_id, x))
+
+                # Push this new city to the fringe
+                heapq.heappush(fringe, new_city)
                 fringe_ids.append(x)
 
-                # Push this new city onto the fringe
-                # print("pushing city: ", str(x) + " to fringe")
-                heapq.heappush(fringe, new_city)
+        # Append current city to the tour
+        print("Appending current city to tour")
+        tour.append(current_city.city_id)
+        print(tour)
+
 
 
 def main():
+    global tour_length
+
     print("Running A* algorithm...")
-    Djikstra_Imp()
+    AStar_Imp()
     print("A* algorithm complete!\n")
     print(f"Completed tour: {tour}")
+
+    # Determine length of calculated tour
+    tour_length = sum(dist_matrix[tour[i]][tour[i + 1]] for i in range(num_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
     print(f"Tour length: {tour_length}")
 
 
