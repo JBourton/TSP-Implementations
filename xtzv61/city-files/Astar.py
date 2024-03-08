@@ -434,13 +434,18 @@ def print_fringe_cities(fringe):
     print(fringe_cities)
 
 
+# Function to calculate cost from current node to all other nodes
+def update_fringe(fringe, current_city):
+    for city in fringe:
+        city.path_cost = get_path_cost(current_city.city_id, city.city_id)
+
+
 def AStar_Imp():
     # Specify global variables to be modified
     global tour
 
     # Set local variables
     fringe = []
-    fringe_ids = []
 
     # Populate an array with unvisited cities
     total_cities = len(dist_matrix)
@@ -448,47 +453,56 @@ def AStar_Imp():
 
     # Create representation of starting city
     start_city = City(0, -1, 0)
-    fringe_ids.append(start_city.city_id)
+    current_city = start_city
 
     # Remove starting city from unvisited list
-    unvisited.remove(start_city.city_id)
+    # unvisited.remove(start_city.city_id)
 
     # Add starting city to fringe
     heapq.heappush(fringe, start_city)
 
     # Explore the fringe until no nodes remain
-    while fringe:
+    while unvisited:
         # Check if a full tour has been constructed
         if len(tour) == total_cities:
-            # Goal node has been reached!
-            exit()
+            # Hamiltonian cycle has been completed!
+            break
 
-        # Display the fringe
-        print_fringe_cities(fringe)
+
+
+        # Potentially change the fringe here to accommodate for new city
 
         # Explore the city with the lowest path cost
         current_city = heapq.heappop(fringe)
         if current_city.city_id in tour:
             continue
         print(f"Current city: {current_city.city_id}")
+        unvisited.remove(current_city.city_id)
 
-        # Iterate through all cities
-        for x in range(total_cities):
+
+        # Update fringe to represent distances from current city to all other cities
+        update_fringe(fringe, current_city)
+
+        # Display the fringe
+        print_fringe_cities(fringe)
+
+        # Iterate through all unvisited cities
+        for x in unvisited:
             # Check that each unvisited city is indeed connected to the current city
-            if x not in tour and x not in fringe_ids and dist_matrix[x][current_city.city_id] != 0:
-                # If so, create a new representation of this unvisited city
-
-                # BUG SPOTTED. The path cost varies depending on which city it's coming from
-                # So the same cities are being added to the fringe with different paths costs
-
-                # Try checking that the city isn't in the fringe already
-
+            if dist_matrix[x][current_city.city_id] != 0:
+                # Modify the fringe with distance from current city to unvisited city
                 new_city = City(x, current_city.city_id,
                                 current_city.path_cost + get_path_cost(current_city.city_id, x))
 
-                # Push this new city to the fringe
+                # Replace the city in the fringe if it's already there
+                if new_city.city_id in unvisited:
+                    # Remove old city
+                    for city in fringe:
+                        if city.city_id == new_city.city_id:
+                            fringe.remove(city)
+                # Add the new city to the fringe
                 heapq.heappush(fringe, new_city)
-                fringe_ids.append(x)
+
 
         # Append current city to the tour
         print("Appending current city to tour")
