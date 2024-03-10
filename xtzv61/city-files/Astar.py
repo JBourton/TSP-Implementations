@@ -454,9 +454,6 @@ def AStar_Imp():
     # Create representation of starting city
     current_city = City(0, -1, 0)
 
-    # Remove starting city from unvisited list
-    # unvisited.remove(start_city.city_id)
-
     # Add starting city to fringe
     heapq.heappush(fringe, current_city)
 
@@ -464,17 +461,11 @@ def AStar_Imp():
     while unvisited:
         # Check if a full tour has been constructed
         if len(tour) == total_cities:
-            # Hamiltonian cycle has been completed!
+            # Hamiltonian cycle found!
             break
-
-        # Potentially change the fringe here to accommodate for new city
 
         # Explore the city with the lowest path cost
         current_city = heapq.heappop(fringe)
-        if current_city.city_id in tour:
-            # [DEBUG] This crashes the program, but it should be investigated why this happens
-            # unvisited.remove(current_city.city_id)
-            continue
         print(f"Current city: {current_city.city_id}")
 
         # Mark the current city as visited
@@ -498,10 +489,7 @@ def AStar_Imp():
                 if new_city.city_id in unvisited:
                     new_fringe = [city for city in fringe if city.city_id != new_city.city_id]
                     fringe = new_fringe
-                    # Remove old city
-                    # for city in fringe:
-                    #     if city.city_id == new_city.city_id:
-                    #        fringe.remove(city)
+
                 # Add the new city to the fringe
                 heapq.heappush(fringe, new_city)
 
@@ -520,7 +508,7 @@ def main():
     print(f"Completed tour: {tour}")
 
     # Determine length of calculated tour
-    tour_length = sum(dist_matrix[tour[i]][tour[i + 1]] for i in range(num_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
+    tour_length = sum(dist_matrix[tour[x]][tour[x + 1]] for x in range(num_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
     print(f"Tour length: {tour_length}")
 
 

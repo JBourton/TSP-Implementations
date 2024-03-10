@@ -454,9 +454,6 @@ def AStar_Imp():
     # Create representation of starting city
     current_city = City(0, -1, 0)
 
-    # Remove starting city from unvisited list
-    # unvisited.remove(start_city.city_id)
-
     # Add starting city to fringe
     heapq.heappush(fringe, current_city)
 
