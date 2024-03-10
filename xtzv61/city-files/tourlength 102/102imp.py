@@ -496,12 +496,10 @@ def AStar_Imp():
 
                 # Replace the city in the fringe if it's already there
                 if new_city.city_id in unvisited:
-                    new_fringe = [city for city in fringe if city.city_id != new_city.city_id]
-                    fringe = new_fringe
                     # Remove old city
-                    # for city in fringe:
-                    #     if city.city_id == new_city.city_id:
-                    #        fringe.remove(city)
+                    for city in fringe:
+                        if city.city_id == new_city.city_id:
+                            fringe.remove(city)
                 # Add the new city to the fringe
                 heapq.heappush(fringe, new_city)
 
