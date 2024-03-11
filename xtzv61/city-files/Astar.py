@@ -301,7 +301,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "AS"
+algorithm_code = "BG"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -416,12 +416,6 @@ def calculate_total_cost(path):
     return path_length
 
 
-# Function to estimate the heuristic cost of reaching the goal node
-def h(k):
-    # Possibly use Minimum Spanning Tree as a heuristic
-    pass
-
-
 # Function to print the cities in the fringe
 def print_fringe_cities(fringe):
     print("Cities in the fringe:")
@@ -440,7 +434,7 @@ def update_fringe(fringe, current_city):
         city.path_cost = get_path_cost(city.city_id, current_city.city_id)
 
 
-def AStar_Imp():
+def Greedy_TSP():
     # Specify global variables to be modified
     global tour
 
@@ -502,9 +496,9 @@ def AStar_Imp():
 def main():
     global tour_length
 
-    print("Running A* algorithm...")
-    AStar_Imp()
-    print("A* algorithm complete!\n")
+    print("Running Basic Greedy algorithm...")
+    Greedy_TSP()
+    print("Greedy algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
     # Determine length of calculated tour
