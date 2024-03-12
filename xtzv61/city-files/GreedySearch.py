@@ -386,13 +386,6 @@ class City:
         else:
             return False
 
-    # Define == operator
-    def __eq__(self, other):
-        if self.path_cost == other.path_cost:
-            return True
-        else:
-            return False
-
 
 # Print distance matrix
 for row in dist_matrix:
