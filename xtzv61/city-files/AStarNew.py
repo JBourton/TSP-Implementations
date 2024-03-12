@@ -301,7 +301,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "BG"
+algorithm_code = "XX"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -362,20 +362,20 @@ added_note = ""
 ############
 ############ END OF SECTOR 9 (IGNORE THIS COMMENT)
 
-# num_cities holds the number of cities
-# Keep track of the best tour (unique ints) and its length
 
-# Define relevant data structures
+# Set reserved variables
 tour = []
 tour_length = 0
 
 
 # Representation of a city
 class City:
-    def __init__(self, city_id, parent_id, path_cost):
+    def __init__(self, city_id, parent_id, path_cost, heuristic_cost, f_cost):
         self.city_id = city_id
         self.parent_id = parent_id
         self.path_cost = path_cost
+        self.heuristic_cost = heuristic_cost
+        self.f_cost = f_cost
 
     # Compare the path cost of 2 nodes by defining comparison operators
 
@@ -401,21 +401,6 @@ for row in dist_matrix:
     print()
 
 
-# Function to calculate retrieve path cost between any 2 cities
-def get_path_cost(cityA, cityB):
-    path_cost = dist_matrix[cityA][cityB]
-    return path_cost
-
-
-# A function which, given a path, calculates the cost of travelling along it
-def calculate_total_cost(path):
-    path_length = 0
-    # Get path cost for each pair of nodes
-    for i in range(0, len(path) - 1):
-        path_length += get_path_cost(path[i], path[i + 1])
-    return path_length
-
-
 # Function to print the cities in the fringe
 def print_fringe_cities(fringe):
     print("Cities in the fringe:")
@@ -428,42 +413,57 @@ def print_fringe_cities(fringe):
     print(fringe_cities)
 
 
+# Return path cost of root to next city [(f(x) value]
+def path_to_city(current_city, next_city):
+    return current_city.path_cost + dist_matrix[current_city.city_id][next_city]
+
+
+# Function to calculate retrieve path cost between any 2 cities
+def get_path_cost(cityA, cityB):
+    path_cost = dist_matrix[cityA][cityB]
+    return path_cost
+
+
 # Function to calculate cost from current node to all other nodes
 def update_fringe(fringe, current_city):
     for city in fringe:
         city.path_cost = get_path_cost(city.city_id, current_city.city_id)
 
 
-def Greedy_TSP():
-    # Specify global variables to be modified
+# Calculate the MST from a given city [g(x) value]
+def prims_heuristic(current_city, unvisited):
+    # Obviously change later
+    return 1
+
+
+# Define A* algorithm
+def AStarTSP():
     global tour
 
     # Set local variables
     fringe = []
 
     # Populate an array with unvisited cities
-    total_cities = len(dist_matrix)
-    unvisited = [x for x in range(total_cities)]
+    unvisited = [x for x in range(num_cities)]
 
     # Create representation of starting city
-    current_city = City(0, -1, 0)
+    current_city = City(0, -1, 0, 0, 0)
+
+    # Find heuristic estimate to full tour
+    current_city.heuristic_cost = prims_heuristic(current_city, unvisited)
+    current_city.f_cost = current_city.heuristic_cost + current_city.path_cost
 
     # Add starting city to fringe
     heapq.heappush(fringe, current_city)
 
-    # Explore the fringe until no nodes remain
+    # Explore the fringe until a valid Hamiltonian Cycle is discovered
     while unvisited:
-        # Check if a full tour has been constructed
-        if len(tour) == total_cities:
-            # Hamiltonian cycle found!
-            break
-
-        # Explore the city with the lowest path cost
+        # Get the next city to explore
         current_city = heapq.heappop(fringe)
-        print(f"Current city: {current_city.city_id}")
-
-        # Mark the current city as visited
         unvisited.remove(current_city.city_id)
+        # Full path found so skip the following computation
+        if not unvisited:
+            break
 
         # Update fringe cities with new distances
         update_fringe(fringe, current_city)
@@ -471,34 +471,27 @@ def Greedy_TSP():
         # Display the fringe
         print_fringe_cities(fringe)
 
-        # Iterate through all unvisited cities
+        # Find estimated heuristic value for current node
+        current_heuristic = prims_heuristic(current_city, unvisited)
+
+        # Iterate through all unexplored neighbors of the current city
         for x in unvisited:
-            # Check that each unvisited city is indeed connected to the current city
-            if dist_matrix[x][current_city.city_id] != 0:
-                # Modify the fringe with distance from current city to unvisited city
-                new_city = City(x, current_city.city_id,
-                                current_city.path_cost + get_path_cost(current_city.city_id, x))
+            pass
 
-                # Replace the city in the fringe if it's already there
-                if new_city.city_id in unvisited:
-                    new_fringe = [city for city in fringe if city.city_id != new_city.city_id]
-                    fringe = new_fringe
+        # code here
 
-                # Add the new city to the fringe
-                heapq.heappush(fringe, new_city)
-
-        # Append current city to the tour
-        print("Appending current city to tour")
-        tour.append(current_city.city_id)
-        print(tour)
+    # Append current city to the tour
+    print("Appending current city to tour")
+    tour.append(current_city.city_id)
+    print(tour)
 
 
 def main():
     global tour_length
 
-    print("Running Basic Greedy algorithm...")
-    Greedy_TSP()
-    print("Greedy algorithm complete!\n")
+    print("Running A* algorithm...")
+    AStarTSP()
+    print("A* algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
     # Determine length of calculated tour

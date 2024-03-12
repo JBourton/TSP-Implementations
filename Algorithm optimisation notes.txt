@@ -1,0 +1,3 @@
+Randomise start city for basic greedy search
+
+For MST, when multiple nodes exist with the same cost, it may be possible to choose a better one out of them
