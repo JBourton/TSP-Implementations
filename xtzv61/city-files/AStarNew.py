@@ -166,7 +166,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile535.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -389,13 +389,15 @@ class City:
 
 
 # Print distance matrix
-for row in dist_matrix:
-    for item in row:
-        print(f"{item:2}", end=" ")
-    print()
+# for row in dist_matrix:
+#    for item in row:
+#        print(f"{item:2}", end=" ")
+#    print()
 
 
 # Function to print the cities in the fringe
+
+
 def print_fringe_cities(fringe):
     print("Cities in the fringe:")
     fringe_cities = ""
@@ -405,6 +407,12 @@ def print_fringe_cities(fringe):
         else:
             fringe_cities = fringe_cities + ", " + str(city.city_id)
     print(fringe_cities)
+
+
+# Function to return the cost of a given path
+def get_path_cost(tour, total_cities=num_cities):
+    cost = sum(dist_matrix[tour[x]][tour[x + 1]] for x in range(total_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
+    return cost
 
 
 # Function to update f-scores of fringe cities
@@ -420,10 +428,29 @@ def update_fringe_values(fringe, current_city, unvisited):
         city.f_cost = city.heuristic_cost + city.path_cost
 
 
-# Calculate the MST from a given city [h(x) value]
-def prims_heuristic(current_city, unvisited):
-    # Obviously change later
+# Find the MST from a given city [h(x) value]
+def prims_heuristic(start_city, unvisited):
     return 1
+    # Add the current city to the MST
+    city_x = start_city
+    MST = [city_x.city_id]
+
+    while len(MST) != len(unvisited):
+        min_edge = float('inf')
+        min_city = City(-1, -1, 0, 0, 0)
+
+        # Iterate through all unvisited cities to find the shortest connection
+        for city in unvisited:
+            if dist_matrix[city_x.city_id][city] < min_edge and city not in MST:
+                min_edge = dist_matrix[city_x.city_id][city]
+                min_city.city_id = city
+
+        # Append the city with the shortest link to the MST
+        MST.append(min_city.city_id)
+        city_x.city_id = min_city.city_id
+
+    MST_Cost = get_path_cost(MST, len(unvisited))
+    # return MST_Cost
 
 
 # Define A* algorithm
@@ -436,9 +463,7 @@ def AStarTSP():
 
     # Create representation of starting city
     current_city = City(0, -1, 0, 0, 0)
-
-    # Find heuristic estimate of full tour with MST
-    current_city.heuristic_cost = prims_heuristic(current_city, unvisited)
+    current_city.heuristic_cost = 0
     current_city.f_cost = current_city.heuristic_cost + current_city.path_cost
 
     # Add starting city to fringe
@@ -456,10 +481,10 @@ def AStarTSP():
                 # Calculate the g(x) path cost from the root to the new city
                 new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
-                # Add h(x) heuristic value
+                # Add MST h(x) heuristic value
                 new_city.heuristic_cost = prims_heuristic(new_city, unvisited)
 
-                # Calculate the f-score of the new city
+                # Calculate the f(x) total score (sum of g(x) and h(x))
                 new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
 
                 # Replace the city in the fringe if it's already there
@@ -470,7 +495,7 @@ def AStarTSP():
                 # Add the new city to the fringe
                 heapq.heappush(fringe, new_city)
 
-        print_fringe_cities(fringe)
+        # print_fringe_cities(fringe)
 
         # Append the city with the lowest f-score to the tour
         current_city = heapq.heappop(fringe)
@@ -487,7 +512,7 @@ def main():
     print(f"Completed tour: {tour}")
 
     # Determine length of calculated tour
-    tour_length = sum(dist_matrix[tour[x]][tour[x + 1]] for x in range(num_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
+    tour_length = get_path_cost(tour)
     print(f"Tour length: {tour_length}")
 
 
