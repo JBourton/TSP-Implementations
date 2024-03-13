@@ -166,7 +166,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile535.txt"
+input_file = "AISearchfile175.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -428,29 +428,32 @@ def update_fringe_values(fringe, current_city, unvisited):
         city.f_cost = city.heuristic_cost + city.path_cost
 
 
-# Find the MST from a given city [h(x) value]
+# Find the Manhatten distance from a given node to the start node
+def manhatten_heuristic(start_city_id):
+    dist = dist_matrix[start_city_id][0] * 2
+    return dist
+
+
 def prims_heuristic(start_city, unvisited):
     return 1
-    # Add the current city to the MST
-    city_x = start_city
-    MST = [city_x.city_id]
+    MST = [start_city.city_id]
+    heap = []  # Priority queue for edges (weight, city_x, city_y)
+    visited = set([start_city.city_id])
+
+    for city in unvisited:
+        heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
 
     while len(MST) != len(unvisited):
-        min_edge = float('inf')
-        min_city = City(-1, -1, 0, 0, 0)
-
-        # Iterate through all unvisited cities to find the shortest connection
-        for city in unvisited:
-            if dist_matrix[city_x.city_id][city] < min_edge and city not in MST:
-                min_edge = dist_matrix[city_x.city_id][city]
-                min_city.city_id = city
-
-        # Append the city with the shortest link to the MST
-        MST.append(min_city.city_id)
-        city_x.city_id = min_city.city_id
+        weight, city_x_id, city_y_id = heapq.heappop(heap)
+        if city_y_id not in visited:
+            MST.append(city_y_id)
+            visited.add(city_y_id)
+            for next_city in unvisited:
+                if next_city not in visited:
+                    heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
 
     MST_Cost = get_path_cost(MST, len(unvisited))
-    # return MST_Cost
+    return MST_Cost
 
 
 # Define A* algorithm
@@ -463,7 +466,7 @@ def AStarTSP():
 
     # Create representation of starting city
     current_city = City(0, -1, 0, 0, 0)
-    current_city.heuristic_cost = 0
+    current_city.heuristic_cost = 0  # prims_heuristic(current_city, unvisited)
     current_city.f_cost = current_city.heuristic_cost + current_city.path_cost
 
     # Add starting city to fringe
@@ -482,7 +485,7 @@ def AStarTSP():
                 new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
                 # Add MST h(x) heuristic value
-                new_city.heuristic_cost = prims_heuristic(new_city, unvisited)
+                new_city.heuristic_cost = manhatten_heuristic(new_city.city_id)  # prims_heuristic(new_city, unvisited)
 
                 # Calculate the f(x) total score (sum of g(x) and h(x))
                 new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
