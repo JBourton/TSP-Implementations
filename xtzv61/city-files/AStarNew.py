@@ -17,6 +17,7 @@ import time
 import random
 import heapq
 import math
+import multiprocessing
 
 
 ############ START OF SECTOR 0 (IGNORE THIS COMMENT)
@@ -166,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile175.txt"
+input_file = "AISearchfile535.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -415,44 +416,36 @@ def get_path_cost(tour, total_cities=num_cities):
     return cost
 
 
-# Function to update f-scores of fringe cities
-def update_fringe_values(fringe, current_city, unvisited):
-    for city in fringe:
-        # Update g(x) value
-        city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
-
-        # Update h(x) value
-        city.heuristic_cost = prims_heuristic(city, unvisited)
-
-        # Finally, sum g(x) & h(x) to get f(x) value
-        city.f_cost = city.heuristic_cost + city.path_cost
+# Find the Manhattan distance from a given node to the start node
+def manhattan_heuristic(start_city_id):
+    dist = pow(dist_matrix[start_city_id][0], 2) * 2
+    return math.sqrt(dist)
 
 
-# Find the Manhatten distance from a given node to the start node
-def manhatten_heuristic(start_city_id):
-    dist = dist_matrix[start_city_id][0] * 2
-    return dist
-
-
+# Calculate the MST from a given node
 def prims_heuristic(start_city, unvisited):
     return 1
-    MST = [start_city.city_id]
-    heap = []  # Priority queue for edges (weight, city_x, city_y)
+    # Heuristic cost is nil if all cities visited
+    if not unvisited:
+        return 0
+
+    MST = {start_city.city_id}
+    heap = []
     visited = set([start_city.city_id])
 
     for city in unvisited:
         heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
 
-    while len(MST) != len(unvisited):
+    while heap:
         weight, city_x_id, city_y_id = heapq.heappop(heap)
         if city_y_id not in visited:
-            MST.append(city_y_id)
+            MST.add(city_y_id)
             visited.add(city_y_id)
             for next_city in unvisited:
                 if next_city not in visited:
                     heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
 
-    MST_Cost = get_path_cost(MST, len(unvisited))
+    MST_Cost = sum(dist_matrix[city_x][city_y] for city_x in MST for city_y in MST if city_x != city_y) / 2
     return MST_Cost
 
 
@@ -485,7 +478,8 @@ def AStarTSP():
                 new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
                 # Add MST h(x) heuristic value
-                new_city.heuristic_cost = manhatten_heuristic(new_city.city_id)  # prims_heuristic(new_city, unvisited)
+                new_city.heuristic_cost = prims_heuristic(new_city,
+                                                          unvisited)  # manhattan_heuristic(new_city.city_id)
 
                 # Calculate the f(x) total score (sum of g(x) and h(x))
                 new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
@@ -506,11 +500,62 @@ def AStarTSP():
         tour.append(current_city.city_id)
 
 
+def AStar2TSP():
+    global tour
+
+    # Define unvisited cities
+    unvisited = set(range(num_cities))
+    fringe = []
+
+    # Create representation of starting city
+    current_city = City(0, -1, 0, 0, 0)
+    current_city.heuristic_cost = 0  # prims_heuristic(current_city, unvisited)
+    current_city.f_cost = current_city.heuristic_cost + current_city.path_cost
+
+    # Add starting city to fringe
+    heapq.heappush(fringe, current_city)
+
+    # Use a set to keep track of cities in the fringe
+    fringe_set = {current_city.city_id}
+
+    # Explore the fringe until a valid Hamiltonian Cycle is discovered
+    while unvisited:
+        # Push all neighbours of current city to the fringe
+        for city in unvisited:
+            # Check that each unvisited city has a connection to the current city
+            if dist_matrix[city][current_city.city_id] != 0:
+                # Create a new city object for each neighbour
+                new_city = City(city, current_city.city_id, 0, 0, 0)
+
+                # Calculate the g(x) path cost from the root to the new city
+                new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
+
+                # Add MST h(x) heuristic value
+                new_city.heuristic_cost = prims_heuristic(new_city, unvisited)  # manhattan_heuristic(new_city.city_id)
+
+                # Calculate the f(x) total score (sum of g(x) and h(x))
+                new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
+
+                # Replace the city in the fringe if it's already there
+                if new_city.city_id in fringe_set:
+                    fringe = [c for c in fringe if c.city_id != new_city.city_id]
+                    fringe_set.remove(new_city.city_id)
+
+                # Add the new city to the fringe
+                heapq.heappush(fringe, new_city)
+                fringe_set.add(new_city.city_id)
+
+        # Append the city with the lowest f-score to the tour
+        current_city = heapq.heappop(fringe)
+        unvisited.remove(current_city.city_id)
+        tour.append(current_city.city_id)
+
+
 def main():
     global tour_length
 
     print("Running A* algorithm...")
-    AStarTSP()
+    AStar2TSP()
     print("A* algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
