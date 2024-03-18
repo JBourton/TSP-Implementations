@@ -167,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile535.txt"
+input_file = "AISearchfile180.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -416,37 +416,74 @@ def get_path_cost(tour, total_cities=num_cities):
     return cost
 
 
-# Find the Manhattan distance from a given node to the start node
-def manhattan_heuristic(start_city_id):
-    dist = pow(dist_matrix[start_city_id][0], 2) * 2
-    return math.sqrt(dist)
-
-
 # Calculate the MST from a given node
 def prims_heuristic(start_city, unvisited):
-    return 1
     # Heuristic cost is nil if all cities visited
     if not unvisited:
         return 0
 
     MST = {start_city.city_id}
     heap = []
-    visited = set([start_city.city_id])
 
     for city in unvisited:
         heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
 
     while heap:
         weight, city_x_id, city_y_id = heapq.heappop(heap)
-        if city_y_id not in visited:
+        if city_y_id not in MST:
             MST.add(city_y_id)
-            visited.add(city_y_id)
             for next_city in unvisited:
-                if next_city not in visited:
+                if next_city not in MST:
                     heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
 
     MST_Cost = sum(dist_matrix[city_x][city_y] for city_x in MST for city_y in MST if city_x != city_y) / 2
     return MST_Cost
+
+
+# Produce a partial MST from a given node
+def partial_prims_heuristic(start_city, unvisited, k):
+    # Heuristic cost is nil if target cities visited
+    if not unvisited or k <= 1:
+        return 0
+
+    # Define MST and heap data structures
+    MST = {start_city.city_id}
+    heap = []
+
+    # Push all neighboring start cities to the heap
+    for city in unvisited:
+        heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
+
+    # Produce MST
+    while len(MST) < k and heap:
+        weight, city_x_id, city_y_id = heapq.heappop(heap)
+        if city_y_id not in MST:
+            MST.add(city_y_id)
+            for next_city in unvisited:
+                if next_city not in MST:
+                    heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
+
+    # Find the total cost of generated MST
+    MST_Cost = sum(dist_matrix[city_x][city_y] for city_x in MST for city_y in MST if city_x != city_y)
+
+    # Each edge is counted twice, so half the result
+    MST_Cost /= 2
+
+    # Add the cost of returning to the start city
+    MST_Cost += dist_matrix[start_city.city_id][city_y_id]
+
+    return MST_Cost
+
+
+# Function to calculate how long to make the partial MST
+def pick_k():
+    city_count = len(dist_matrix)
+    match city_count:
+        case city_count if city_count <= 100:
+            return city_count
+        # Prevent the partial MST from being too large
+        case _:
+            return 100
 
 
 # Define A* algorithm
@@ -479,7 +516,7 @@ def AStarTSP():
 
                 # Add MST h(x) heuristic value
                 new_city.heuristic_cost = prims_heuristic(new_city,
-                                                          unvisited)  # manhattan_heuristic(new_city.city_id)
+                                                          unvisited)
 
                 # Calculate the f(x) total score (sum of g(x) and h(x))
                 new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
@@ -506,6 +543,7 @@ def AStar2TSP():
     # Define unvisited cities
     unvisited = set(range(num_cities))
     fringe = []
+    k = pick_k()
 
     # Create representation of starting city
     current_city = City(0, -1, 0, 0, 0)
@@ -531,14 +569,14 @@ def AStar2TSP():
                 new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
                 # Add MST h(x) heuristic value
-                new_city.heuristic_cost = prims_heuristic(new_city, unvisited)  # manhattan_heuristic(new_city.city_id)
+                new_city.heuristic_cost = partial_prims_heuristic2(new_city, unvisited, k)
 
                 # Calculate the f(x) total score (sum of g(x) and h(x))
                 new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
 
                 # Replace the city in the fringe if it's already there
                 if new_city.city_id in fringe_set:
-                    fringe = [c for c in fringe if c.city_id != new_city.city_id]
+                    fringe = [city for city in fringe if city.city_id != new_city.city_id]
                     fringe_set.remove(new_city.city_id)
 
                 # Add the new city to the fringe
@@ -549,6 +587,46 @@ def AStar2TSP():
         current_city = heapq.heappop(fringe)
         unvisited.remove(current_city.city_id)
         tour.append(current_city.city_id)
+
+import heapq
+
+def partial_prims_heuristic2(start_city, unvisited, k):
+    # Heuristic cost is nil if target cities visited
+    if not unvisited or k <= 1:
+        return 0
+
+    # Define MST and heap data structures
+    MST = {start_city.city_id}
+    heap = []
+
+    # Push all neighboring start cities to the heap
+    for city in unvisited:
+        heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
+
+    # Produce MST
+    while len(MST) < k and heap:
+        weight, city_x_id, city_y_id = heapq.heappop(heap)
+        if city_y_id not in MST:
+            MST.add(city_y_id)
+            for next_city in unvisited:
+                if next_city not in MST:
+                    heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
+        else:
+            # Heap pruning - skip this edge if already in the MST
+            continue
+
+    # Find the total cost of generated MST
+    MST_Cost = 0
+    for city_x in MST:
+        for city_y in MST:
+            if city_x != city_y:
+                MST_Cost += dist_matrix[city_x][city_y]
+
+    # Add the cost of returning to the start city
+    MST_Cost += dist_matrix[start_city.city_id][city_y_id]
+
+    return MST_Cost
+
 
 
 def main():
