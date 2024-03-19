@@ -167,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile017.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -566,10 +566,10 @@ def AStar2TSP():
     unvisited = set(range(num_cities))
     fringe = []
 
+    first_city_id = random.randint(0, num_cities-1)
+
     # Create representation of starting city
-    current_city = City(0, -1, 0, 0, 0)
-    # current_city.heuristic_cost = 0  # prims_heuristic(current_city, unvisited)
-    current_city.f_cost = -1 # current_city.heuristic_cost + current_city.path_cost
+    current_city = City(first_city_id, -1, 0, 0, -1)
 
     # Add starting city to fringe
     heapq.heappush(fringe, current_city)
