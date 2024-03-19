@@ -167,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile175.txt"
+input_file = "AISearchfile180.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -389,58 +389,13 @@ class City:
             return False
 
 
-# Print distance matrix
-# for row in dist_matrix:
-#    for item in row:
-#        print(f"{item:2}", end=" ")
-#    print()
-
-
-# Function to print the cities in the fringe
-
-
-def print_fringe_cities(fringe):
-    print("Cities in the fringe:")
-    fringe_cities = ""
-    for city in fringe:
-        if fringe_cities == "":
-            fringe_cities = str(city.city_id)
-        else:
-            fringe_cities = fringe_cities + ", " + str(city.city_id)
-    print(fringe_cities)
-
-
 # Function to return the cost of a given path
 def get_path_cost(tour, total_cities=num_cities):
     cost = sum(dist_matrix[tour[x]][tour[x + 1]] for x in range(total_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
     return cost
 
 
-# Calculate the MST from a given node
-def prims_heuristic(start_city, unvisited):
-    # Heuristic cost is nil if all cities visited
-    if not unvisited:
-        return 0
-
-    MST = {start_city.city_id}
-    heap = []
-
-    for city in unvisited:
-        heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
-
-    while heap:
-        weight, city_x_id, city_y_id = heapq.heappop(heap)
-        if city_y_id not in MST:
-            MST.add(city_y_id)
-            for next_city in unvisited:
-                if next_city not in MST:
-                    heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
-
-    MST_Cost = sum(dist_matrix[city_x][city_y] for city_x in MST for city_y in MST if city_x != city_y) / 2
-    return MST_Cost
-
-
-# Calculate the MST using pruning
+# Calculate the MST from a given node (inc. heap pruning)
 def pruned_prims_heuristic(start_city, unvisited):
     # Heuristic cost is nil if all cities visited
     if not unvisited:
@@ -479,58 +434,71 @@ def pruned_prims_heuristic(start_city, unvisited):
     return MST_Cost
 
 
-# Produce a partial MST from a given node
-def partial_prims_heuristic(start_city, unvisited, k):
-    # Heuristic cost is nil if target cities visited
-    if not unvisited or k <= 1:
-        return 0
+def pruned_prims_heuristic2(start_city, unvisited, wantHeuristic=True):
+    # Heuristic cost is nil if all cities visited
+    if not unvisited:
+        return 0 if wantHeuristic else start_city.city_id
 
-    # Define MST and heap data structures
     MST = {start_city.city_id}
     heap = []
 
-    # Push all neighboring start cities to the heap
+    # Create initial heap by adding neighbors of start city
     for city in unvisited:
         heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
 
+    last_added_city = None  # Initialize variable to keep track of the last node added to the MST
+
     # Produce MST
-    while len(MST) < k and heap:
+    while heap:
         weight, city_x_id, city_y_id = heapq.heappop(heap)
         if city_y_id not in MST:
             MST.add(city_y_id)
+            last_added_city = city_y_id
+            # Add the new city's neighbors to the heap
             for next_city in unvisited:
                 if next_city not in MST:
                     heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
+        else:
+            # Heap is pruned by skipping edge if already in MST
+            continue
 
-    # Find the total cost of generated MST
-    MST_Cost = sum(dist_matrix[city_x][city_y] for city_x in MST for city_y in MST if city_x != city_y)
+    # Return the length of the MST for heuristic cost
+    if wantHeuristic:
+        # Calculate the sum of each MST edge
+        MST_Cost = 0
+        for city_x in MST:
+            for city_y in MST:
+                if city_x != city_y:
+                    MST_Cost += dist_matrix[city_x][city_y]
 
-    # Each edge is counted twice, so half the result
-    MST_Cost /= 2
+        # Each edge is counted twice, so half the result
+        MST_Cost /= 2
 
-    # Add the cost of returning to the start city
-    MST_Cost += dist_matrix[start_city.city_id][city_y_id]
-
-    return MST_Cost
+        return MST_Cost
+    # Otherwise, return the last city of the MST for start city selection
+    else:
+        return last_added_city
 
 
 # Define A* algorithm
-def AStar2TSP():
+def AStarTSP():
     global tour
 
     # Define unvisited cities
     unvisited = set(range(num_cities))
     fringe = []
 
-    # Create representation of starting city
-    current_city = City(0, -1, 0, 0, 0)
-    current_city.heuristic_cost = 0  # prims_heuristic(current_city, unvisited)
-    current_city.f_cost = current_city.heuristic_cost + current_city.path_cost
+    # Pick starting city as the last city in the MST
+    city_zero = City(0, -1, 0, 0, 0)
+    current_city_id = pruned_prims_heuristic2(city_zero, unvisited, False) # random.randint(0, num_cities-1) #
+    current_city = City(current_city_id, -1, 0, 0, 0)
+    # current_city.heuristic_cost = 0  # prims_heuristic(current_city, unvisited)
+    # current_city.f_cost = current_city.heuristic_cost + current_city.path_cost
 
     # Add starting city to fringe
     heapq.heappush(fringe, current_city)
 
-    # Use a set to keep track of cities in the fringe
+    # Create log of fringe cities
     fringe_set = {current_city.city_id}
 
     # Explore the fringe until a valid Hamiltonian Cycle is discovered
@@ -566,48 +534,11 @@ def AStar2TSP():
         tour.append(current_city.city_id)
 
 
-def partial_prims_heuristic2(start_city, unvisited, k):
-    # Heuristic cost is nil if target cities visited
-    if not unvisited or k <= 1:
-        return 0
-
-    # Define MST and heap data structures
-    MST = {start_city.city_id}
-    heap = []
-
-    # Push all neighboring start cities to the heap
-    for city in unvisited:
-        heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
-
-    # Produce MST
-    while len(MST) < k and heap:
-        weight, city_x_id, city_y_id = heapq.heappop(heap)
-        if city_y_id not in MST:
-            MST.add(city_y_id)
-            for next_city in unvisited:
-                if next_city not in MST:
-                    heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
-        else:
-            # Heap pruning - skip this edge if already in the MST
-            continue
-
-    # Find the total cost of generated MST
-    MST_Cost = 0
-    for city_x in MST:
-        for city_y in MST:
-            if city_x != city_y:
-                MST_Cost += dist_matrix[city_x][city_y]
-
-    # Add the cost of returning to the start city
-    MST_Cost += dist_matrix[start_city.city_id][city_y_id]
-
-    return MST_Cost
-
 def main():
     global tour_length
 
     print("Running A* algorithm...")
-    AStar2TSP()
+    AStarTSP()
     print("A* algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
