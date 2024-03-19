@@ -1,0 +1,7 @@
+USER = xtzv61 (Joshua Bourton),
+ALGORITHM CODE = AS, NAME OF CITY-FILE = AISearchfile012.txt,
+SIZE = 12, TOUR LENGTH = 148,
+0,11,10,1,5,9,2,8,3,4,6,7,
+NOTE = 
+RUN-TIME = 0.0 seconds.
+CERTIFICATE = 785.
