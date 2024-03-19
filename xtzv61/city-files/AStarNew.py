@@ -167,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile058.txt"
+input_file = "AISearchfile175.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -514,17 +514,6 @@ def partial_prims_heuristic(start_city, unvisited, k):
     return MST_Cost
 
 
-# Function to calculate how long to make the partial MST
-def pick_k():
-    city_count = len(dist_matrix)
-    match city_count:
-        case city_count if city_count <= 100:
-            return city_count
-        # Prevent the partial MST from being too large
-        case _:
-            return 100
-
-
 # Define A* algorithm
 def AStar2TSP():
     global tour
@@ -532,7 +521,6 @@ def AStar2TSP():
     # Define unvisited cities
     unvisited = set(range(num_cities))
     fringe = []
-    k = pick_k()
 
     # Create representation of starting city
     current_city = City(0, -1, 0, 0, 0)
