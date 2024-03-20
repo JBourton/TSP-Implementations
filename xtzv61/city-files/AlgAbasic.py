@@ -569,7 +569,7 @@ def AStar2TSP():
     first_city_id = random.randint(0, num_cities-1)
 
     # Create representation of starting city
-    current_city = City(first_city_id, -1, 0, 0, -1)
+    current_city = City(first_city_id, -1, 0, 0, 0)
 
     # Add starting city to fringe
     heapq.heappush(fringe, current_city)

@@ -167,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile535.txt"
+input_file = "AISearchfile012.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -303,7 +303,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "AS"
+algorithm_code = "ID"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -395,6 +395,7 @@ def get_path_cost(tour, total_cities=num_cities):
     return cost
 
 
+# Return the MST or its cost using Prim's algorithm
 def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
     # Heuristic cost is nil if all cities visited
     if not unvisited:
@@ -442,7 +443,7 @@ def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
 
 
 # Define A* algorithm
-def AStarTSP():
+def AStarIDTSP():
     global tour
 
     # Define unvisited cities
@@ -452,13 +453,19 @@ def AStarTSP():
     # Pick starting city as the last city in the MST
     city_zero = City(0, -1, 0, 0, 0)
     starting_city_id = pruned_prims_heuristic(city_zero, unvisited, False)
-    current_city = City(starting_city_id, -1, 0, 0, 0)
+
+    # Set parameters for starting city
+    starting_city_heuristic = pruned_prims_heuristic(city_zero, unvisited)
+    current_city = City(starting_city_id, -1, 0, starting_city_heuristic, starting_city_heuristic)
 
     # Add starting city to fringe
     heapq.heappush(fringe, current_city)
 
     # Create log of fringe cities
     fringe_set = {current_city.city_id}
+
+    # Set the initial depth limit
+    depth_limit = current_city.f_cost
 
     # Explore the fringe until a valid Hamiltonian Cycle is discovered
     while unvisited:
@@ -497,7 +504,7 @@ def main():
     global tour_length
 
     print("Running A* algorithm...")
-    AStarTSP()
+    AStarIDTSP()
     print("A* algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
