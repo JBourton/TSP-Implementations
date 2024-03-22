@@ -167,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile180.txt"
+input_file = "AISearchfile042.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -303,7 +303,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "AS"
+algorithm_code = "ID"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -372,13 +372,16 @@ tour_length = 0
 
 # Representation of a city
 class City:
-    def __init__(self, city_id, path_cost, heuristic_cost, f_cost):
+    def __init__(self, city_id, parent_id, path_cost, heuristic_cost, f_cost):
         self.city_id = city_id
+        self.parent_id = parent_id
         self.path_cost = path_cost
         self.heuristic_cost = heuristic_cost
         self.f_cost = f_cost
 
-    # Compare the path cost of 2 nodes by defining the < operator
+    # Compare the path cost of 2 nodes by defining comparison operators
+
+    # Define < operator
     def __lt__(self, second_city):
         if self.f_cost < second_city.f_cost:
             return True
@@ -392,29 +395,51 @@ def get_path_cost(tour, total_cities=num_cities):
     return cost
 
 
-# Calculate the MST from a given node
-def prims_heuristic(start_city, unvisited):
+# Return the MST or its cost using Prim's algorithm
+def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
     # Heuristic cost is nil if all cities visited
     if not unvisited:
-        return 0
+        return 0 if wantHeuristic else start_city.city_id
 
     MST = {start_city.city_id}
     heap = []
 
+    # Create initial heap by adding neighbors of start city
     for city in unvisited:
         heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
 
+    last_added_city = None  # Initialize variable to keep track of the last node added to the MST
+
+    # Produce MST
     while heap:
         weight, city_x_id, city_y_id = heapq.heappop(heap)
         if city_y_id not in MST:
             MST.add(city_y_id)
+            last_added_city = city_y_id
+            # Add the new city's neighbors to the heap
             for next_city in unvisited:
                 if next_city not in MST:
                     heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
+        else:
+            # Heap is pruned by skipping edge if already in MST
+            continue
 
-    # Calculate the sum of each MST edge
-    MST_Cost = sum(dist_matrix[city_x][city_y] for city_x in MST for city_y in MST if city_x != city_y) / 2
-    return MST_Cost
+    # Return the length of the MST for heuristic cost
+    if wantHeuristic:
+        # Calculate the sum of each MST edge
+        MST_Cost = 0
+        for city_x in MST:
+            for city_y in MST:
+                if city_x != city_y:
+                    MST_Cost += dist_matrix[city_x][city_y]
+
+        # Each edge is counted twice, so half the result
+        MST_Cost /= 2
+
+        return MST_Cost
+    # Otherwise, return the last city of the MST for start city selection
+    else:
+        return last_added_city
 
 
 # Define A* algorithm with iterative deepening
@@ -424,8 +449,6 @@ def IDAStarTSP():
     # Set initial depth limit
     depth_limit = 0
 
-    first_city_id = random.randint(0, num_cities - 1)
-
     while True:
         # Reset all tour variables for each iteration
         tour = []
@@ -434,8 +457,10 @@ def IDAStarTSP():
         unvisited = set(range(num_cities))
         fringe = []
 
-        # Create representation of starting city
-        current_city = City(first_city_id, 0, 0, 0)
+        # Pick starting city as the last city in the MST
+        city_zero = City(0, -1, 0, 0, 0)
+        starting_city_id = pruned_prims_heuristic(city_zero, unvisited, False)
+        current_city = City(starting_city_id, -1, 0, 0, 0)
 
         # Add starting city to fringe
         heapq.heappush(fringe, current_city)
@@ -451,13 +476,13 @@ def IDAStarTSP():
                 # Check that each unvisited city has a connection to the current city
                 if dist_matrix[city][current_city.city_id] != 0:
                     # Create a new city object for each neighbour
-                    new_city = City(city, 0, 0, 0)
+                    new_city = City(city, current_city.city_id, 0, 0, 0)
 
                     # Calculate the g(x) path cost from the root to the new city
                     new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
                     # Add MST h(x) heuristic value
-                    new_city.heuristic_cost = prims_heuristic(new_city, unvisited)
+                    new_city.heuristic_cost = pruned_prims_heuristic(new_city, unvisited)
 
                     # Calculate the f(x) total score (sum of g(x) and h(x))
                     new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
