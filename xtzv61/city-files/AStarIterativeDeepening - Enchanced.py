@@ -167,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile175.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -446,65 +446,157 @@ def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
 def AStarIDTSP():
     global tour
 
-    # Define unvisited cities
-    unvisited = set(range(num_cities))
-    fringe = []
+    # Iteratively apply A* with increasing depth limits until a valid Hamiltonian Cycle is found
+    while True:
+        # Reset unvisited cities and tour for each iteration
+        unvisited = set(range(num_cities))
+        fringe = []
 
-    # Pick starting city as the last city in the MST
-    city_zero = City(0, -1, 0, 0, 0)
-    starting_city_id = pruned_prims_heuristic(city_zero, unvisited, False)
+        # Pick starting city as the last city in the MST
+        city_zero = City(0, -1, 0, 0, 0)
+        starting_city_id = pruned_prims_heuristic(city_zero, unvisited, False)
 
-    # Set parameters for starting city
-    starting_city_heuristic = pruned_prims_heuristic(city_zero, unvisited)
-    current_city = City(starting_city_id, -1, 0, starting_city_heuristic, starting_city_heuristic)
+        # Set parameters for starting city
+        starting_city_heuristic = pruned_prims_heuristic(city_zero, unvisited)
+        current_city = City(starting_city_id, -1, 0, starting_city_heuristic, starting_city_heuristic)
 
-    # Add starting city to fringe
-    heapq.heappush(fringe, current_city)
+        # Add starting city to fringe
+        heapq.heappush(fringe, current_city)
 
-    # Create log of fringe cities
-    fringe_set = {current_city.city_id}
+        # Create log of fringe cities
+        fringe_set = {current_city.city_id}
 
-    # Set the initial depth limit
-    depth_limit = current_city.f_cost
+        # Set initial depth limit
+        depth_limit = current_city.heuristic_cost
 
-    # Explore the fringe until a valid Hamiltonian Cycle is discovered
-    while unvisited:
-        # Push all neighbours of current city to the fringe
-        for city in unvisited:
-            # Check that each unvisited city has a connection to the current city
-            if dist_matrix[city][current_city.city_id] != 0:
-                # Create a new city object for each neighbour
-                new_city = City(city, current_city.city_id, 0, 0, 0)
+        # Explore the fringe until a valid Hamiltonian Cycle is discovered
+        while unvisited:
+            # Push all neighbours of current city to the fringe
+            for city in unvisited:
+                # Check that each unvisited city has a connection to the current city
+                if dist_matrix[city][current_city.city_id] != 0:
+                    # Create a new city object for each neighbour
+                    new_city = City(city, current_city.city_id, 0, 0, 0)
 
-                # Calculate the g(x) path cost from the root to the new city
-                new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
+                    # Calculate the g(x) path cost from the root to the new city
+                    new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
-                # Add MST h(x) heuristic value
-                new_city.heuristic_cost = pruned_prims_heuristic(new_city, unvisited)
+                    # Add MST h(x) heuristic value
+                    new_city.heuristic_cost = pruned_prims_heuristic(new_city, unvisited)
 
-                # Calculate the f(x) total score (sum of g(x) and h(x))
-                new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
+                    # Calculate the f(x) total score (sum of g(x) and h(x))
+                    new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
 
-                # Replace the city in the fringe if it's already there
-                if new_city.city_id in fringe_set:
-                    fringe = [city for city in fringe if city.city_id != new_city.city_id]
-                    fringe_set.remove(new_city.city_id)
+                    # Prune the node if f(x) exceeds the depth limit
+                    if new_city.f_cost > depth_limit:
+                        unvisited.remove(new_city.city_id)
+                        continue
 
-                # Add the new city to the fringe
-                heapq.heappush(fringe, new_city)
-                fringe_set.add(new_city.city_id)
+                    # Replace the city in the fringe if it's already there
+                    if new_city.city_id in fringe_set:
+                        fringe = [city for city in fringe if city.city_id != new_city.city_id]
+                        fringe_set.remove(new_city.city_id)
 
-        # Append the city with the lowest f-score to the tour
-        current_city = heapq.heappop(fringe)
-        unvisited.remove(current_city.city_id)
-        tour.append(current_city.city_id)
+                    # Add the new city to the fringe
+                    heapq.heappush(fringe, new_city)
+                    fringe_set.add(new_city.city_id)
+
+            # Append the city with the lowest f-score to the tour
+            current_city = heapq.heappop(fringe)
+            unvisited.remove(current_city.city_id)
+            tour.append(current_city.city_id)
+
+
+# Define A* algorithm with iterative deepening
+def iterative_deepening_A_star_TSP():
+    global tour
+
+    # Set initial depth limit
+    depth_limit = 0
+
+    while True:
+        # Reset all tour variables for each iteration
+        tour = []
+
+        # Define unvisited cities
+        unvisited = set(range(num_cities))
+        fringe = []
+
+        # Pick starting city as the last city in the MST
+        city_zero = City(0, -1, 0, 0, 0)
+        starting_city_id = pruned_prims_heuristic(city_zero, unvisited, False)
+        current_city = City(starting_city_id, -1, 0, 0, 0)
+
+        # Add starting city to fringe
+        heapq.heappush(fringe, current_city)
+
+        # Create log of fringe cities
+        fringe_set = {current_city.city_id}
+
+        # Explore the fringe until a valid Hamiltonian Cycle is discovered or depth limit is reached
+        pruned_cities = []
+        while unvisited:
+            # Push all neighbours of current city to the fringe
+            for city in unvisited:
+                # Check that each unvisited city has a connection to the current city
+                if dist_matrix[city][current_city.city_id] != 0:
+                    # Create a new city object for each neighbour
+                    new_city = City(city, current_city.city_id, 0, 0, 0)
+
+                    # Calculate the g(x) path cost from the root to the new city
+                    new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
+
+                    # Add MST h(x) heuristic value
+                    new_city.heuristic_cost = pruned_prims_heuristic(new_city, unvisited)
+
+                    # Calculate the f(x) total score (sum of g(x) and h(x))
+                    new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
+
+                    # Prune nodes with f-score > depth limit
+                    if new_city.f_cost > depth_limit:
+                        pruned_cities.append(new_city)
+                        continue
+
+                    # Figure out what to do with pruned nodes here
+
+                    # Replace the city in the fringe if it's already there
+                    if new_city.city_id in fringe_set:
+                        fringe = [city for city in fringe if city.city_id != new_city.city_id]
+                        fringe_set.remove(new_city.city_id)
+
+                    # Add the new city to the fringe
+                    heapq.heappush(fringe, new_city)
+                    fringe_set.add(new_city.city_id)
+
+            # Append the city with the lowest f-score to the tour
+            if fringe:
+                current_city = heapq.heappop(fringe)
+                tour.append(current_city.city_id)
+            else:
+                break
+            #current_city = heapq.heappop(fringe)
+            #tour.append(current_city.city_id)
+
+            # Remove pruned cities from the unvisited set
+            unvisited.remove(current_city.city_id)
+            #for city_id in pruned_city_ids:
+            #    unvisited.remove(city_id)
+
+        # An IDA* search up to the current depth limit has now been performed
+        # Conclude if a full tour was discovered
+        if len(tour) == num_cities:
+            break
+
+        # If not, increase depth limit for the next iteration
+        depth_limit = min(city.f_cost for city in pruned_cities)
 
 
 def main():
     global tour_length
 
     print("Running A* algorithm...")
-    AStarIDTSP()
+    # AStarIDTSP()
+    iterative_deepening_A_star_TSP()
     print("A* algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
