@@ -417,7 +417,7 @@ def prims_heuristic(start_city, unvisited):
     return MST_Cost
 
 
-# Define A* algorithm with iterative deepening
+# Define basic A* algorithm with iterative deepening
 def IDAStarTSP():
     global tour
 

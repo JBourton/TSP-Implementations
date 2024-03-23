@@ -165,7 +165,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile535.txt"
+input_file = "AISearchfile012.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -385,25 +385,7 @@ def calculate_total_cost(path):
     return path_length
 
 
-# A function to sort the edges of an adjacency matrix into ascending order
 def sort_edges():
-    edges = []
-
-    # Iterate over the upper triangle of the matrix
-    for x in range(len(dist_matrix)):
-        for y in range(x, len(dist_matrix[x])):
-            weight = dist_matrix[x][y]
-            # Add the new edge if it exsists
-            if weight != 0:
-                edges.append((x, y, weight))
-
-    # Sort the list of edges based on the weights
-    edges.sort(key=lambda cost: cost[2])
-
-    return edges
-
-
-def sort_all_edges():
     edges = []
 
     # Iterate over all pairs of vertices in the adjacency matrix
@@ -420,13 +402,13 @@ def sort_all_edges():
     return edges
 
 
+# Define basic greedy algorithm
 def Greedy_TSP():
     # Specify global variables to be modified
     global tour
 
     # Sort the edges in ascending order
-    edges = sort_all_edges()
-    print(edges)
+    edges = sort_edges()
 
     # Select the shortest path as the first city
     shortest_edge = edges[0]
@@ -451,11 +433,11 @@ def Greedy_TSP():
         shortest_edge = min(connected_edges, key=lambda cost: cost[2])
 
         # Remove all instances of the parent city from tour
-        # this shouldn't be -1
         edges = [edge for edge in edges if edge[0] != tour[-1] and edge[1] != tour[-1]]
 
         # Add the new city to the tour
         tour.append(shortest_edge[1])
+
 
 def main():
     global tour_length

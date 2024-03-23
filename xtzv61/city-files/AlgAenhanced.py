@@ -440,7 +440,7 @@ def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
         return last_added_city
 
 
-# Define A* algorithm with iterative deepening
+# Define enchanced A* algorithm with iterative deepening
 def IDAStarTSP():
     global tour
 
