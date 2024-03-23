@@ -44,8 +44,15 @@ Note: Greedy search is 1 point less (easier) but lacks a heuristic function, whi
 Data structures:
 - Fringe (open nodes)
 - Visited (closed nodes)
-- Best possible tour so far (may need to terminate within 1 min)
+- Best possible tour so far (may need to terminate within 1 min
 
+GREEDY WITH 2-OPT: https://www.mdpi.com/2071-1050/15/6/5111#:~:text=The%202%2Dopt%20algorithm%20is,to%20the%20optimal%20global%20solution.
+
+
+Sorted edges:
+Could have one version that tries to connect edges like normal.
+The another version that always goes for the cheapest edges unless it violates the conditions.
+I.e. edges added don't necessarily have to be connected, they just cant revisit any
 --------------------------------------------------------------
 OPTION 3: Hill Climbing Search
 --------------------------------------------------------------

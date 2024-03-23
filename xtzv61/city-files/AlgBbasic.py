@@ -165,7 +165,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile535.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -370,30 +370,6 @@ tour = []
 tour_length = 0
 
 
-# Representation of a city
-class City:
-    def __init__(self, city_id, parent_id, path_cost):
-        self.city_id = city_id
-        self.parent_id = parent_id
-        self.path_cost = path_cost
-
-    # Compare the path cost of 2 nodes by defining comparison operators
-
-    # Define < operator
-    def __lt__(self, second_city):
-        if self.path_cost < second_city.path_cost:
-            return True
-        else:
-            return False
-
-
-# Print distance matrix
-for row in dist_matrix:
-    for item in row:
-        print(f"{item:2}", end=" ")
-    print()
-
-
 # Function to calculate retrieve path cost between any 2 cities
 def get_path_cost(cityA, cityB):
     path_cost = dist_matrix[cityA][cityB]
@@ -409,81 +385,77 @@ def calculate_total_cost(path):
     return path_length
 
 
-# Function to print the cities in the fringe
-def print_fringe_cities(fringe):
-    print("Cities in the fringe:")
-    fringe_cities = ""
-    for city in fringe:
-        if fringe_cities == "":
-            fringe_cities = str(city.city_id)
-        else:
-            fringe_cities = fringe_cities + ", " + str(city.city_id)
-    print(fringe_cities)
+# A function to sort the edges of an adjacency matrix into ascending order
+def sort_edges():
+    edges = []
+
+    # Iterate over the upper triangle of the matrix
+    for x in range(len(dist_matrix)):
+        for y in range(x, len(dist_matrix[x])):
+            weight = dist_matrix[x][y]
+            # Add the new edge if it exsists
+            if weight != 0:
+                edges.append((x, y, weight))
+
+    # Sort the list of edges based on the weights
+    edges.sort(key=lambda cost: cost[2])
+
+    return edges
 
 
-# Function to calculate cost from current node to all other nodes
-def update_fringe(fringe, current_city):
-    for city in fringe:
-        city.path_cost = get_path_cost(city.city_id, current_city.city_id)
+def sort_all_edges():
+    edges = []
+
+    # Iterate over all pairs of vertices in the adjacency matrix
+    for x in range(len(dist_matrix)):
+        for y in range(len(dist_matrix[x])):
+            weight = dist_matrix[x][y]
+            # Add the new edge if it exists and if it's not a self-loop
+            if weight != 0 and x != y:
+                edges.append((x, y, weight))
+
+    # Sort the list of edges based on the weights
+    edges.sort(key=lambda cost: cost[2])
+
+    return edges
 
 
 def Greedy_TSP():
     # Specify global variables to be modified
     global tour
 
-    # Set local variables
-    fringe = []
+    # Sort the edges in ascending order
+    edges = sort_all_edges()
+    print(edges)
 
-    # Populate an array with unvisited cities
-    unvisited = [x for x in range(num_cities)]
+    # Select the shortest path as the first city
+    shortest_edge = edges[0]
 
-    # Create representation of starting city
-    current_city = City(3, -1, 0)
+    # Add the first city to the tour
+    tour.append(shortest_edge[0])
+    tour.append(shortest_edge[1])
 
-    # Add starting city to fringe
-    heapq.heappush(fringe, current_city)
+    # Remove the first edge from the edge list
+    edges = [edge for edge in edges if edge[0] != tour[0] and edge[1] != tour[0]]
 
-    # Explore the fringe until no nodes remain
-    while unvisited:
-        # Check if a full tour has been constructed
-        if len(tour) == num_cities:
-            # Hamiltonian cycle found!
-            break
+    # Iteratively add the next closest city to the tour
+    while len(tour) < num_cities:
+        # Get the edges connected to the last city in the tour
+        connected_edges = [edge for edge in edges if edge[0] == tour[-1]]
 
-        # Explore the city with the lowest path cost
-        current_city = heapq.heappop(fringe)
-        print(f"Current city: {current_city.city_id}")
+        # Skip if no connected edges
+        if not connected_edges:
+            continue
 
-        # Mark the current city as visited
-        unvisited.remove(current_city.city_id)
+        # Select the minimum edge cost amongst those cities
+        shortest_edge = min(connected_edges, key=lambda cost: cost[2])
 
-        # Update fringe cities with new distances
-        update_fringe(fringe, current_city)
+        # Remove all instances of the parent city from tour
+        # this shouldn't be -1
+        edges = [edge for edge in edges if edge[0] != tour[-1] and edge[1] != tour[-1]]
 
-        # Display the fringe
-        print_fringe_cities(fringe)
-
-        # Iterate through all unvisited cities
-        for x in unvisited:
-            # Check that each unvisited city is indeed connected to the current city
-            if dist_matrix[x][current_city.city_id] != 0:
-                # Modify the fringe with distance from current city to unvisited city
-                new_city = City(x, current_city.city_id,
-                                current_city.path_cost + get_path_cost(current_city.city_id, x))
-
-                # Replace the city in the fringe if it's already there
-                if new_city.city_id in unvisited:
-                    new_fringe = [city for city in fringe if city.city_id != new_city.city_id]
-                    fringe = new_fringe
-
-                # Add the new city to the fringe
-                heapq.heappush(fringe, new_city)
-
-        # Append current city to the tour
-        print("Appending current city to tour")
-        tour.append(current_city.city_id)
-        print(tour)
-
+        # Add the new city to the tour
+        tour.append(shortest_edge[1])
 
 def main():
     global tour_length
