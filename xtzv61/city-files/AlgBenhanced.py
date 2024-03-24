@@ -165,7 +165,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile017.txt"
+input_file = "AISearchfile021.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -418,41 +418,43 @@ def Greedy_TSP():
     # Select the shortest path as the first city
     shortest_path = edges[0]
 
-    # Add the first city to the tour
+    # Add the first city to the tour and increment its degree
     tour_edges.append(shortest_path)
+    first_place_id = shortest_path[0]
+    city_degrees[first_place_id] += 2
+    city_degrees[shortest_path[1]] += 1
 
     # Remove the shortest path from the list of edges
     edges = [edge for edge in edges if edge != shortest_path]
 
     # Iteratively add the next closest city to the tour
-    while len(tour_edges) < num_cities -1:
+    while len(tour_edges) < num_cities:
         # Select the shortest path as the next city
         print("edges: ", edges)
         if not edges:
-            break # HERE ONLY 12 EDGES ARE BEING ADDED TO THE TOUR, FIX IT
+            break  # HERE ONLY 12 EDGES ARE BEING ADDED TO THE TOUR, FIX IT
             # VISITEDCITIES.ADD(TOUR[0]) IS CAUSING AN ERROR BECAUSE NO DEGREE WITH 1 IS BEING ADDED
         shortest_path = edges[0]
 
         # Remove the shortest path from the list of edges
         edges = [edge for edge in edges if edge != shortest_path]
 
-        # Increment the degree of each city in the path
-        city_degrees[shortest_path[0]] += 1
-        city_degrees[shortest_path[1]] += 1
-
         # For both cities in the path, check if their degree is no more than 2
-        if city_degrees[shortest_path[0]] <= 2 and city_degrees[shortest_path[1]] <= 2:
+        if city_degrees[shortest_path[0]] < 2 and city_degrees[shortest_path[1]] < 2:
             # If so, this is a valid path; add it to the edge set
             tour_edges.append(shortest_path)
+
+            # Increment the degree of each city in the path
+            city_degrees[shortest_path[0]] += 1
+            city_degrees[shortest_path[1]] += 1
 
     # A full set of edges has now been found
     # Reconstruct them into a tour
     print("tour edges: ", tour_edges)
 
-    # Set all city degrees > 2 to 2
-    for i in range(len(city_degrees)):
-        if city_degrees[i] > 2:
-            city_degrees[i] = 2
+    # Mark the 1st vertex in the tour
+    city_degrees[first_place_id] -= 1
+
     print("city degrees: ", city_degrees)
 
     # Begin by adding the first city with degree 1 to the tour
@@ -460,6 +462,7 @@ def Greedy_TSP():
         if city_degrees[edge[0]] == 1:
             tour.append(edge[0])
             break
+    print("tour: ", tour)
 
     # Track visited cities to construct a hamiltonian cycle
     visited_cities = set()
@@ -468,6 +471,10 @@ def Greedy_TSP():
     # Iteravley connect each city to its parent
     while len(tour) < num_cities:
         # Find the edge connected to the current city
+        # --------------------------------------------------------------------------------
+        # Trying to find an edge for 3, which has degree one so there are none
+        # want to add the edge with degree 1 last, as the last city in the tour
+        # --------------------------------------------------------------------------------
         for edge in tour_edges:
             if edge[1] == tour[-1]:
                 next_city = edge[0]
@@ -477,14 +484,16 @@ def Greedy_TSP():
             else:
                 continue
 
+            print("next city: ", next_city)
+
             # Ensure the next city doesn't violate the path constraints
             if next_city not in visited_cities:
+                print("next city not in visited cities")
                 # If it doesn't, append it to the tour
                 tour.append(next_city)
                 visited_cities.add(next_city)
-                break
 
-    print("tour: ", tour)
+            print("tour: ", tour)
 
 
 def main():
@@ -503,7 +512,6 @@ def main():
 # Commence Greedy algorithm by calling main
 if __name__ == "__main__":
     main()
-
 
 ############ START OF SECTOR 10 (IGNORE THIS COMMENT)
 ############
