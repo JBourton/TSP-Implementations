@@ -165,7 +165,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile535.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -438,9 +438,39 @@ def Greedy_TSP():
         # Add the new city to the tour
         tour.append(shortest_edge[1])
 
+    # Now refine the tour using 2-opt
+    two_opt()
+
+
+# Perform the 2-opt function to optmise the greedy tour
+def two_opt():
+    global tour
+    current_best_tour = tour
+    isBetter = True
+
+    # Iterativly swap crossover cities until a better tour is found
+    while isBetter:
+        isBetter = False
+        for i in range(1, len(current_best_tour) - 1):
+            for j in range(i + 1, len(current_best_tour)):
+                # Form another tour by reversing the order of 2 citys
+                new_tour = current_best_tour.copy()
+                new_tour[i:j] = new_tour[j - 1:i - 1:-1]
+                # Update if the new tour is found to be an improvment
+                if calculate_total_cost(new_tour) < calculate_total_cost(current_best_tour):
+                    current_best_tour = new_tour
+                    isBetter = True
+                    break
+            if isBetter:
+                break
+
+    # Finally, set the best discovered tour as the global final tour
+    tour = current_best_tour
+
 
 def main():
     global tour_length
+    global tour
 
     print("Running Basic Greedy algorithm...")
     Greedy_TSP()

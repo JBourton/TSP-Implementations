@@ -402,8 +402,12 @@ def sort_upper_edges():
     return edges
 
 
+def generate_edge_set():
+    pass
+
+
 # Define enhanced greedy algorithm
-def Greedy_TSP():
+def Advanced_Greedy_TSP():
     # Specify global variables to be modified
     global tour
 
@@ -430,17 +434,25 @@ def Greedy_TSP():
     # Iteratively add the next closest city to the tour
     while len(tour_edges) < num_cities:
         # Select the shortest path as the next city
-        print("edges: ", edges)
         if not edges:
-            break  # HERE ONLY 12 EDGES ARE BEING ADDED TO THE TOUR, FIX IT
-            # VISITEDCITIES.ADD(TOUR[0]) IS CAUSING AN ERROR BECAUSE NO DEGREE WITH 1 IS BEING ADDED
+            break
         shortest_path = edges[0]
 
         # Remove the shortest path from the list of edges
         edges = [edge for edge in edges if edge != shortest_path]
 
+        # If this isn't the last edge, check that the end node won't prematurely close the tour
+        # NOTE: THIS IS LOOKING FOR CONNECTIONS IN THE EDGE SET, WHICH MAY OR MAY NOT BE ADDED TO THE TOUR
+        validEdge = False
+        if not len(tour_edges) == num_cities - 2:
+            for edge in edges:
+                if shortest_path[1] in edge[:2] or shortest_path[0] in edge[:2]:
+                    print("shortest path: ", shortest_path)
+                    validEdge = True
+                    break
+
         # For both cities in the path, check if their degree is no more than 2
-        if city_degrees[shortest_path[0]] < 2 and city_degrees[shortest_path[1]] < 2:
+        if city_degrees[shortest_path[0]] < 2 and city_degrees[shortest_path[1]] < 2 and validEdge:
             # If so, this is a valid path; add it to the edge set
             tour_edges.append(shortest_path)
 
@@ -450,26 +462,29 @@ def Greedy_TSP():
 
     # A full set of edges has now been found
     # Reconstruct them into a tour
+    # -- MAKE THIS INTO ITS OWN FUNCTION --
     print("tour edges: ", tour_edges)
+    print("Number of edges: ", len(tour_edges))
 
     # Mark the 1st vertex in the tour
     city_degrees[first_place_id] -= 1
 
     print("city degrees: ", city_degrees)
 
-    # Begin by adding the first city with degree 1 to the tour
+    end_edges = []
     for edge in tour_edges:
         if city_degrees[edge[0]] == 1:
-            tour.append(edge[0])
-            break
-    print("tour: ", tour)
+            end_edges.append(edge[0])
+
+    # Begin by adding the first city with degree 1 to the tour
+    tour.append(end_edges[0])
 
     # Track visited cities to construct a hamiltonian cycle
     visited_cities = set()
     visited_cities.add(tour[0])
 
     # Iteravley connect each city to its parent
-    while len(tour) < num_cities:
+    while len(tour) < num_cities - 1:
         # Find the edge connected to the current city
         # --------------------------------------------------------------------------------
         # Trying to find an edge for 3, which has degree one so there are none
@@ -483,8 +498,6 @@ def Greedy_TSP():
             # Pass by any edges that don't connect to the parent city
             else:
                 continue
-
-            print("next city: ", next_city)
 
             # Ensure the next city doesn't violate the path constraints
             if next_city not in visited_cities:
@@ -500,7 +513,7 @@ def main():
     global tour_length
 
     print("Running Basic Greedy algorithm...")
-    Greedy_TSP()
+    Advanced_Greedy_TSP()
     print("Greedy algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
