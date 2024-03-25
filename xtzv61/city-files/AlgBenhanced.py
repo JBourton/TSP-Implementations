@@ -402,35 +402,7 @@ def sort_upper_edges():
     return edges
 
 
-def generate_edge_set():
-    pass
-
-
-# Define enhanced greedy algorithm
-def Advanced_Greedy_TSP():
-    # Specify global variables to be modified
-    global tour
-
-    # Define lists to track the edges and the degree of each city
-    city_degrees = [0] * num_cities
-    tour_edges = []
-
-    # Sort the edges in ascending order (assuming edges are already sorted)
-    edges = sort_upper_edges()
-    print("edges: ", edges)
-
-    # Select the shortest path as the first city
-    shortest_path = edges[0]
-
-    # Add the first city to the tour and increment its degree
-    tour_edges.append(shortest_path)
-    first_place_id = shortest_path[0]
-    city_degrees[first_place_id] += 2
-    city_degrees[shortest_path[1]] += 1
-
-    # Remove the shortest path from the list of edges
-    edges = [edge for edge in edges if edge != shortest_path]
-
+def generate_edge_set(edges, tour_edges, shortest_path, city_degrees):
     # Iteratively add the next closest city to the tour
     while len(tour_edges) < num_cities:
         # Select the shortest path as the next city
@@ -460,9 +432,11 @@ def Advanced_Greedy_TSP():
             city_degrees[shortest_path[0]] += 1
             city_degrees[shortest_path[1]] += 1
 
-    # A full set of edges has now been found
-    # Reconstruct them into a tour
-    # -- MAKE THIS INTO ITS OWN FUNCTION --
+    return tour_edges
+
+
+# Connect edges with neighbors to form a full tour
+def combine_tour_edges(first_place_id, tour_edges, city_degrees):
     print("tour edges: ", tour_edges)
     print("Number of edges: ", len(tour_edges))
 
@@ -507,6 +481,38 @@ def Advanced_Greedy_TSP():
                 visited_cities.add(next_city)
 
             print("tour: ", tour)
+
+
+# Define enhanced greedy algorithm
+def Advanced_Greedy_TSP():
+    # Specify global variables to be modified
+    global tour
+
+    # Define lists to track the edges and the degree of each city
+    city_degrees = [0] * num_cities
+    tour_edges = []
+
+    # Sort the edges in ascending order (assuming edges are already sorted)
+    edges = sort_upper_edges()
+    print("edges: ", edges)
+
+    # Select the shortest path as the first city
+    shortest_path = edges[0]
+
+    # Add the first city to the tour and increment its degree
+    tour_edges.append(shortest_path)
+    first_place_id = shortest_path[0]
+    city_degrees[first_place_id] += 2
+    city_degrees[shortest_path[1]] += 1
+
+    # Remove the shortest path from the list of edges
+    edges = [edge for edge in edges if edge != shortest_path]
+
+    # Generate the edge set
+    tour_edges = generate_edge_set(edges, tour_edges, shortest_path, city_degrees)
+
+    # Build the edges into a tour
+    combine_tour_edges(first_place_id, tour_edges, city_degrees)
 
 
 def main():
