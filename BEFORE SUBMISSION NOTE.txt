@@ -1,0 +1,2 @@
+Before submitting, change AlgA basic to start from city 0 instead of a random city
+This will ensure that the AlgA enhanced is more likely to give a better tour

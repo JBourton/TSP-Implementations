@@ -1,4 +1,4 @@
-Feedback for user-ID abcd12 at Mar 26 17:13:09
+Feedback for user-ID xtzv61 at Mar 26 18:32:13
 
 Throughout this validation, as many error messages as possible are returned in order to help you understand what might have gone wrong. However, note that sometimes a single error might lead to early termination of the validation process so that fixing this error results in more, as yet unseen, errors. So, the list of error messages might not be exhaustive but it's the best I can do!
 
@@ -16,77 +16,47 @@ By the way, if you don't bother to validate prior to submission and so don't inc
 
 #####  Program submission
 #####   * program cluster AlgA:
-#####      - AlgAbasic.py: there were validation errors (algorithm code AS)
-#####         *** error: the definitive user-name and the program file user-name do not match
-*** Warning: you appear to have altered the core skeleton code even though I told you not to! So, your code might not run for me. I would fix this if I were you. Discrepancies appear in sectors 0, 3 and 10.
-#####      - AlgAenhanced.py: there were validation errors (algorithm code AS)
-#####         *** error: the definitive user-name and the program file user-name do not match
-*** Warning: you appear to have altered the core skeleton code even though I told you not to! So, your code might not run for me. I would fix this if I were you. Discrepancies appear in sectors 0, 3 and 10.
-#####     *** MAJOR ERROR: THIS PROGRAM CLUSTER IS INVALID!
+#####      - AlgAbasic.py: successful validation (iterative deepening A-star search, tariff 8)
+#####      - AlgAenhanced.py: successful validation (iterative deepening A-star search, tariff 8)
 #####   * program cluster AlgB:
-#####      - AlgBbasic.py: there were validation errors (algorithm code BG)
-#####         *** error: the definitive user-name and the program file user-name do not match
-*** Warning: you appear to have altered the core skeleton code even though I told you not to! So, your code might not run for me. I would fix this if I were you. Discrepancies appear in sectors 0, 3 and 10.
-#####      - AlgBenhanced.py: there were validation errors (algorithm code BG)
-#####         *** error: the definitive user-name and the program file user-name do not match
-*** Warning: you appear to have altered the core skeleton code even though I told you not to! So, your code might not run for me. I would fix this if I were you. Discrepancies appear in sectors 0, 3 and 10.
-#####     *** MAJOR ERROR: THIS PROGRAM CLUSTER IS INVALID!
+#####      - AlgBbasic.py: successful validation (basic greedy search, tariff 4)
+#####      - AlgBenhanced.py: successful validation (basic greedy search, tariff 4)
 
 The next part of this feedback is validation of the tour files that you submitted. Each has been validated and the outcome is described below. If any tour has an associated error message then it is deemed to be invalid and it will secure no marks. Remember: as stated above, any tours arising from an invalid program cluster will not secure any marks (irrespective of whether they are actually legal tours or not). The tour lengths of successfully validated tours given below go to form your tour-quality mark.
 
 #####  Tour file submission
 #####   * program cluster AlgA:
-#####      - AlgA_AISearchfile012.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile017.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile021.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile026.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile042.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile048.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile058.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile175.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile180.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgA_AISearchfile535.txt: there were validation errors:
-#####        *** error: the tour file does not exist
+#####      - AlgA_AISearchfile012.txt: valid tour of length 56 (iterative deepening A-star search, run-time 0.0 seconds)
+#####      - AlgA_AISearchfile017.txt: valid tour of length 1704 (iterative deepening A-star search, run-time 0.0 seconds)
+#####      - AlgA_AISearchfile021.txt: valid tour of length 3204 (iterative deepening A-star search, run-time 0.2 seconds)
+#####      - AlgA_AISearchfile026.txt: valid tour of length 1822 (iterative deepening A-star search, run-time 0.2 seconds)
+#####      - AlgA_AISearchfile042.txt: valid tour of length 1689 (iterative deepening A-star search, run-time 0.5 seconds)
+#####      - AlgA_AISearchfile048.txt: valid tour of length 17224 (iterative deepening A-star search, run-time 1.0 seconds)
+#####      - AlgA_AISearchfile058.txt: valid tour of length 27384 (iterative deepening A-star search, run-time 1.4 seconds)
+#####      - AlgA_AISearchfile175.txt: valid tour of length 22149 (iterative deepening A-star search, run-time 147.6 seconds)
+#####      - AlgA_AISearchfile180.txt: valid tour of length 11440 (iterative deepening A-star search, run-time 164.5 seconds)
+#####      - AlgA_AISearchfile535.txt: valid tour of length 50069 (iterative deepening A-star search, run-time 17053.0 seconds)
 #####   * program cluster AlgB:
-#####      - AlgB_AISearchfile012.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile017.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile021.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile026.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile042.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile048.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile058.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile175.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile180.txt: there were validation errors:
-#####        *** error: the tour file does not exist
-#####      - AlgB_AISearchfile535.txt: there were validation errors:
-#####        *** error: the tour file does not exist
+#####      - AlgB_AISearchfile012.txt: valid tour of length 56 (basic greedy search, run-time 0.0 seconds)
+#####      - AlgB_AISearchfile017.txt: valid tour of length 1610 (basic greedy search, run-time 0.0 seconds)
+#####      - AlgB_AISearchfile021.txt: valid tour of length 3273 (basic greedy search, run-time 0.1 seconds)
+#####      - AlgB_AISearchfile026.txt: valid tour of length 1554 (basic greedy search, run-time 0.1 seconds)
+#####      - AlgB_AISearchfile042.txt: valid tour of length 1326 (basic greedy search, run-time 0.9 seconds)
+#####      - AlgB_AISearchfile048.txt: valid tour of length 13802 (basic greedy search, run-time 1.7 seconds)
+#####      - AlgB_AISearchfile058.txt: valid tour of length 26948 (basic greedy search, run-time 1.0 seconds)
+#####      - AlgB_AISearchfile175.txt: valid tour of length 21761 (basic greedy search, run-time 28.7 seconds)
+#####      - AlgB_AISearchfile180.txt: valid tour of length 11120 (basic greedy search, run-time 35.0 seconds)
+#####      - AlgB_AISearchfile535.txt: valid tour of length 48998 (basic greedy search, run-time 4753.6 seconds)
 
 The next part of this feedback states whether the proforma and the validation feedback were submitted.
 
 #####  Additional items submission
-#####   * AISearchProforma.pdf: not submitted
+#####   * AISearchProforma.pdf: submitted
 #####   * AISearchValidationFeedback.txt: not submitted
 
 Of course, the validation feedback file might be flagged as 'not submitted' as it should be this file!
 
-By the way, you have extraneous material in your folder 'abcd12' that should be removed.
+By the way, you have extraneous material in your folder 'xtzv61' that should be removed.
 
 #####  Extraneous material:
-#####   * AISearchProforma.docx; AlgAbasic_AISearchfile175_Mar23002636.txt; AlgAbasic_AISearchfile535_Mar23060248.txt; AlgAenhanced_AISearchfile012_Mar19170342.txt; AlgAenhanced_AISearchfile017_Mar19170406.txt; AlgAenhanced_AISearchfile021_Mar19142622.txt; AlgAenhanced_AISearchfile026_Mar19170553.txt; AlgAenhanced_AISearchfile042_Mar19164232.txt; AlgAenhanced_AISearchfile048_Mar14125802.txt; AlgAenhanced_AISearchfile058_Mar19160552.txt; AlgAenhanced_AISearchfile180_Mar22212613.txt; AlgBbasic_AISearchfile012_Mar23140837.txt; AlgBbasic_AISearchfile021_Mar23140958.txt; AlgBbasic_AISearchfile058_Mar23141034.txt; AlgBbasic_AISearchfile175_Mar23141044.txt; AlgBbasic_AISearchfile180_Mar23141051.txt; AlgBbasic_AISearchfile535_Mar23141128.txt; AlgBenhanced_AISearchfile017_Mar24125725.txt; AlgBenhanced_AISearchfile026_Mar24125953.txt; AlgBenhanced_AISearchfile042_Mar24130008.txt; AlgBenhanced_AISearchfile048_Mar24130015.txt.
+#####   * AlgB_AISearchfile175_Mar23141044.txt.

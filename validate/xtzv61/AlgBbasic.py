@@ -15,8 +15,6 @@ import os
 import sys
 import time
 import random
-import heapq
-
 
 ############ START OF SECTOR 0 (IGNORE THIS COMMENT)
 ############
@@ -29,8 +27,8 @@ import heapq
 ############
 
 def read_file_into_string(input_file, ord_range):
-    the_file = open(input_file, 'r')
-    current_char = the_file.read(1)
+    the_file = open(input_file, 'r') 
+    current_char = the_file.read(1) 
     file_string = ""
     length = len(ord_range)
     while current_char != "":
@@ -45,7 +43,6 @@ def read_file_into_string(input_file, ord_range):
     the_file.close()
     return file_string
 
-
 def remove_all_spaces(the_string):
     length = len(the_string)
     new_string = ""
@@ -53,7 +50,6 @@ def remove_all_spaces(the_string):
         if the_string[i] != " ":
             new_string = new_string + the_string[i]
     return new_string
-
 
 def integerize(the_string):
     length = len(the_string)
@@ -63,7 +59,6 @@ def integerize(the_string):
             stripped_string = stripped_string + the_string[i]
     resulting_int = int(stripped_string)
     return resulting_int
-
 
 def convert_to_list_of_int(the_string):
     list_of_integers = []
@@ -79,7 +74,6 @@ def convert_to_list_of_int(the_string):
             if the_string[location:location + 5] == "NOTE=":
                 finished = True
     return list_of_integers
-
 
 def build_distance_matrix(num_cities, distances, city_format):
     dist_matrix = []
@@ -116,20 +110,19 @@ def build_distance_matrix(num_cities, distances, city_format):
                     dist_matrix[i][j] = dist_matrix[j][i]
     return dist_matrix
 
-
 def read_in_algorithm_codes_and_tariffs(alg_codes_file):
     flag = "good"
-    code_dictionary = {}
-    tariff_dictionary = {}
+    code_dictionary = {}   
+    tariff_dictionary = {}  
     if not os.path.exists(alg_codes_file):
-        flag = "not_exist"
+        flag = "not_exist"  
         return code_dictionary, tariff_dictionary, flag
     ord_range = [[32, 126]]
-    file_string = read_file_into_string(alg_codes_file, ord_range)
+    file_string = read_file_into_string(alg_codes_file, ord_range)  
     location = 0
     EOF = False
-    list_of_items = []
-    while EOF == False:
+    list_of_items = []  
+    while EOF == False: 
         found_comma = file_string.find(",", location)
         if found_comma == -1:
             EOF = True
@@ -138,12 +131,11 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
             sandwich = file_string[location:found_comma]
             location = found_comma + 1
         list_of_items.append(sandwich)
-    third_length = int(len(list_of_items) / 3)
+    third_length = int(len(list_of_items)/3)
     for i in range(third_length):
         code_dictionary[list_of_items[3 * i]] = list_of_items[3 * i + 1]
         tariff_dictionary[list_of_items[3 * i]] = int(list_of_items[3 * i + 2])
     return code_dictionary, tariff_dictionary, flag
-
 
 ############
 ############ HAVE YOU TOUCHED ANYTHING ABOVE? BECAUSE EVEN CHANGING ONE CHARACTER OR
@@ -199,12 +191,12 @@ location = file_string.find("SIZE=")
 if location == -1:
     print("*** error: The city file " + input_file + " is incorrectly formatted.")
     sys.exit()
-
+    
 comma = file_string.find(",", location)
 if comma == -1:
     print("*** error: The city file " + input_file + " is incorrectly formatted.")
     sys.exit()
-
+    
 num_cities_as_string = file_string[location + 5:comma]
 num_cities = integerize(num_cities_as_string)
 print("   the number of cities is stored in 'num_cities' and is " + str(num_cities))
@@ -216,9 +208,9 @@ distances = convert_to_list_of_int(stripped_file_string)
 counted_distances = len(distances)
 if counted_distances == num_cities * num_cities:
     city_format = "full"
-elif counted_distances == (num_cities * (num_cities + 1)) / 2:
+elif counted_distances == (num_cities * (num_cities + 1))/2:
     city_format = "upper_tri"
-elif counted_distances == (num_cities * (num_cities - 1)) / 2:
+elif counted_distances == (num_cities * (num_cities - 1))/2:
     city_format = "strict_upper_tri"
 else:
     print("*** error: The city file " + input_file + " is incorrectly formatted.")
@@ -382,34 +374,6 @@ def calculate_total_cost(path):
     return path_length
 
 
-# ENCHANCEMENT 2
-# Perform the 2-opt function to optmise the greedy tour
-def two_opt():
-    global tour
-    current_best_tour = tour
-    isBetter = True
-
-    # Iterativly swap crossover cities until a better tour is found
-    while isBetter:
-        isBetter = False
-        for i in range(1, len(current_best_tour) - 1):
-            for j in range(i + 1, len(current_best_tour)):
-                # Form another tour by reversing the order of 2 citys
-                new_tour = current_best_tour.copy()
-                new_tour[i:j] = new_tour[j - 1:i - 1:-1]
-
-                # Update if the new tour is found to be an improvment
-                if calculate_total_cost(new_tour) < calculate_total_cost(current_best_tour):
-                    current_best_tour = new_tour
-                    isBetter = True
-                    break
-            if isBetter:
-                break
-
-    # Finally, set the best discovered tour as the global final tour
-    tour = current_best_tour
-
-
 # Function to sort the edges in ascending order of path cost
 def sort_edges():
     edges = []
@@ -428,17 +392,13 @@ def sort_edges():
     return edges
 
 
-# Define advanced greedy algorithm
+# Define basic greedy algorithm
 def Greedy_TSP():
     # Specify global variables to be modified
     global tour
 
     # Sort the edges in ascending order
     edges = sort_edges()
-
-    # ENCHANCEMENT 1A
-    # Shuffle the first 10 edges to avoid always selecting the same path
-    random.shuffle(edges[:10])
 
     # Select the shortest path as the first city
     shortest_edge = edges[0]
@@ -468,59 +428,13 @@ def Greedy_TSP():
         # Add the new city to the tour
         tour.append(shortest_edge[1])
 
-    # ENHANCEMENT 2
-    # Finally, refine the tour using 2-opt
-    two_opt()
-
-
-# ENCHANCEMENT 1A
-# Function to perform multiple restarts of the greedy algorithm
-def multiple_restarts():
-    # Set the varaibles to track the tour results
-    global tour
-    ultimate_tour = None
-    ultimate_length = float('inf')
-
-    # Select the number of restarts with regards to tour size
-    num_restarts = select_num_restarts()
-
-    # Iterativly run the greedy algorithm and select the best score amongst the results
-    for restart in range(num_restarts):
-        tour = []
-        Greedy_TSP()
-        current_tour_size = calculate_total_cost(tour)
-
-        if current_tour_size < ultimate_length:
-            ultimate_tour = tour
-            ultimate_length = current_tour_size
-
-    # Set the global tour to the best tour found from multiple restarts
-    tour = ultimate_tour
-
-
-# ENCHANCMENT 1B
-# Function to set the number of restarts depending on size of tour to construct
-# This prevents the algorithm from running for too long on large tours
-def select_num_restarts():
-    if num_cities < 25:
-        return 10
-    elif num_cities < 50:
-        return 5
-    elif num_cities < 100:
-        return 3
-    elif num_cities < 150:
-        return 2
-    else:
-        return 1
-
 
 def main():
     global tour_length
+    global tour
+
     print("Running Basic Greedy algorithm...")
-
-    # Call the algorithm that repeatdly runs the greedy algorithm and searches for the best tour amongst the results
-    multiple_restarts()
-
+    Greedy_TSP()
     print("Greedy algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
@@ -532,6 +446,7 @@ def main():
 # Commence Greedy algorithm by calling main
 if __name__ == "__main__":
     main()
+
 
 ############ START OF SECTOR 10 (IGNORE THIS COMMENT)
 ############
@@ -555,47 +470,32 @@ end_time = time.time()
 elapsed_time = round(end_time - start_time, 1)
 
 if algorithm_code == "GA":
-    try:
-        max_it
-    except NameError:
-        max_it = None
-    try:
-        pop_size
-    except NameError:
-        pop_size = None
+    try: max_it
+    except NameError: max_it = None
+    try: pop_size
+    except NameError: pop_size = None
     if added_note != "":
         added_note = added_note + "\n"
-    added_note = added_note + "The parameter values are 'max_it' = " + str(max_it) + " and 'pop_size' = " + str(
-        pop_size) + "."
+    added_note = added_note + "The parameter values are 'max_it' = " + str(max_it) + " and 'pop_size' = " + str(pop_size) + "."
 
 if algorithm_code == "AC":
-    try:
-        max_it
-    except NameError:
-        max_it = None
-    try:
-        num_ants
-    except NameError:
-        num_ants = None
+    try: max_it
+    except NameError: max_it = None
+    try: num_ants
+    except NameError: num_ants = None
     if added_note != "":
         added_note = added_note + "\n"
-    added_note = added_note + "The parameter values are 'max_it' = " + str(max_it) + " and 'num_ants' = " + str(
-        num_ants) + "."
+    added_note = added_note + "The parameter values are 'max_it' = " + str(max_it) + " and 'num_ants' = " + str(num_ants) + "."
 
 if algorithm_code == "PS":
-    try:
-        max_it
-    except NameError:
-        max_it = None
-    try:
-        num_parts
-    except NameError:
-        num_parts = None
+    try: max_it
+    except NameError: max_it = None
+    try: num_parts
+    except NameError: num_parts = None
     if added_note != "":
         added_note = added_note + "\n"
-    added_note = added_note + "The parameter values are 'max_it' = " + str(max_it) + " and 'num_parts' = " + str(
-        num_parts) + "."
-
+    added_note = added_note + "The parameter values are 'max_it' = " + str(max_it) + " and 'num_parts' = " + str(num_parts) + "."
+    
 added_note = added_note + "\nRUN-TIME = " + str(elapsed_time) + " seconds.\n"
 
 flag = "good"
@@ -613,8 +513,7 @@ if isinstance(tour_length, int) == False:
     sys.exit()
 tour_length = int(tour_length)
 if len(tour) != num_cities:
-    print("*** error: The tour does not consist of " + str(num_cities) + " cities as there are, in fact, " + str(
-        len(tour)) + ".")
+    print("*** error: The tour does not consist of " + str(num_cities) + " cities as there are, in fact, " + str(len(tour)) + ".")
     sys.exit()
 flag = "good"
 for i in range(0, num_cities):
@@ -628,8 +527,7 @@ for i in range(0, num_cities - 1):
     check_tour_length = check_tour_length + dist_matrix[tour[i]][tour[i + 1]]
 check_tour_length = check_tour_length + dist_matrix[tour[num_cities - 1]][tour[0]]
 if tour_length != check_tour_length:
-    flag = print("*** error: The length of your tour is not " + str(tour_length) + "; it is actually " + str(
-        check_tour_length) + ".")
+    flag = print("*** error: The length of your tour is not " + str(tour_length) + "; it is actually " + str(check_tour_length) + ".")
     sys.exit()
 print("You, user " + my_user_name + ", have successfully built a tour of length " + str(tour_length) + "!")
 len_user_name = len(my_user_name)
@@ -647,15 +545,14 @@ output_file_time = output_file_time.replace(" ", "0")
 script_name = os.path.basename(sys.argv[0])
 if len(sys.argv) > 2:
     output_file_time = sys.argv[2]
-output_file_name = script_name[0:len(script_name) - 3] + "_" + input_file[
-                                                               0:len(input_file) - 4] + "_" + output_file_time + ".txt"
+output_file_name = script_name[0:len(script_name) - 3] + "_" + input_file[0:len(input_file) - 4] + "_" + output_file_time + ".txt"
 
-f = open(output_file_name, 'w')
+f = open(output_file_name,'w')
 f.write("USER = {0} ({1} {2}),\n".format(my_user_name, my_first_name, my_last_name))
 f.write("ALGORITHM CODE = {0}, NAME OF CITY-FILE = {1},\n".format(algorithm_code, input_file))
 f.write("SIZE = {0}, TOUR LENGTH = {1},\n".format(num_cities, tour_length))
 f.write(str(tour[0]))
-for i in range(1, num_cities):
+for i in range(1,num_cities):
     f.write(",{0}".format(tour[i]))
 f.write(",\nNOTE = {0}".format(added_note))
 f.write("CERTIFICATE = {0}.\n".format(certificate))

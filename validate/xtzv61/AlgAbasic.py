@@ -157,7 +157,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile180.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -293,7 +293,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "ID"
+algorithm_code = "IA"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -382,66 +382,39 @@ def get_path_cost(tour, total_cities=num_cities):
     return cost
 
 
-# OPTIMISATION 2
-# MST heuristic (Prim's algorithm) with pruning applied
-def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
+# Calculate the MST from a given node
+def prims_heuristic(start_city, unvisited):
     # Heuristic cost is nil if all cities visited
     if not unvisited:
-        return 0 if wantHeuristic else start_city.city_id
+        return 0
 
     MST = {start_city.city_id}
     heap = []
 
-    # Create initial heap by adding neighbors of start city
     for city in unvisited:
         heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
 
-    # Track the last city added to the MST
-    last_added_city = None
-
-    # Produce MST
     while heap:
         weight, city_x_id, city_y_id = heapq.heappop(heap)
-        # OPTIMISATION 2: Heap is pruned by skipping edge if already in MST
         if city_y_id not in MST:
             MST.add(city_y_id)
-            last_added_city = city_y_id
-            # Add the new city's neighbors to the heap
             for next_city in unvisited:
                 if next_city not in MST:
                     heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
-        else:
-            continue
 
-    # Return the length of the MST for heuristic cost
-    if wantHeuristic:
-        # Calculate the sum of each MST edge
-        MST_Cost = 0
-        for city_x in MST:
-            for city_y in MST:
-                if city_x != city_y:
-                    MST_Cost += dist_matrix[city_x][city_y]
-
-        # Each edge is counted twice, so half the result
-        MST_Cost /= 2
-
-        return MST_Cost
-    # Otherwise, return the last city of the MST for start city selection
-    else:
-        return last_added_city
+    # Calculate the sum of each MST edge
+    MST_Cost = sum(dist_matrix[city_x][city_y] for city_x in MST for city_y in MST if city_x != city_y) / 2
+    return MST_Cost
 
 
-# Define enchanced A* algorithm with iterative deepening
+# Define basic A* algorithm with iterative deepening
 def IDAStarTSP():
     global tour
 
-    # OPTIMISATION 2: Pick starting city as the last city in the MST
-    city_zero = City(0, 0, 0, 0)
-    unvisited = set(range(num_cities))
-    starting_city_id = pruned_prims_heuristic(city_zero, unvisited, False)
-
     # Set initial depth limit
     depth_limit = 0
+
+    first_city_id = random.randint(0, num_cities - 1)
 
     while True:
         # Reset all tour variables for each iteration
@@ -451,8 +424,8 @@ def IDAStarTSP():
         unvisited = set(range(num_cities))
         fringe = []
 
-        # Restart the tour
-        current_city = City(starting_city_id, 0, 0, 0)
+        # Create representation of starting city
+        current_city = City(first_city_id, 0, 0, 0)
 
         # Add starting city to fringe
         heapq.heappush(fringe, current_city)
@@ -474,7 +447,7 @@ def IDAStarTSP():
                     new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
                     # Add MST h(x) heuristic value
-                    new_city.heuristic_cost = pruned_prims_heuristic(new_city, unvisited)
+                    new_city.heuristic_cost = prims_heuristic(new_city, unvisited)
 
                     # Calculate the f(x) total score (sum of g(x) and h(x))
                     new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
@@ -529,6 +502,7 @@ def main():
 # Commence A* algorithm by calling main
 if __name__ == "__main__":
     main()
+
 
 
 ############ START OF SECTOR 10 (IGNORE THIS COMMENT)
