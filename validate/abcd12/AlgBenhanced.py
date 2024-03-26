@@ -361,8 +361,6 @@ added_note = ""
 ############ TOUR-FILE PRODUCED BY THIS CODE.
 ############
 ############ END OF SECTOR 9 (IGNORE THIS COMMENT)
-# num_cities holds the number of cities
-# Keep track of the best tour (unique ints) and its length
 
 # Define relevant data structures
 tour = []

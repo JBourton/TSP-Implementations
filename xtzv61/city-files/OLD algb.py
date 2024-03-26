@@ -165,7 +165,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile048.txt"
+input_file = "AISearchfile021.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -384,7 +384,172 @@ def calculate_total_cost(path):
     return path_length
 
 
-# ENCHANCEMENT 2
+# MODIFICATION 1: Sort the edges in ascending order avoiding repeats
+def sort_upper_edges():
+    edges = []
+
+    # MODFICATION 1: Graph is bidirectional, so only upper triangular part of the matrix need be iterated over
+    for x in range(len(dist_matrix)):
+        for y in range(x, len(dist_matrix[x])):
+            weight = dist_matrix[x][y]
+            # Where an edge exits, add it to the list of edges
+            if weight != 0:
+                edges.append((x, y, weight))
+
+    # Sort edges into ascending order based on their cost
+    edges.sort(key=lambda cost: cost[2])
+
+    return edges
+
+
+# MODIFICATION 2: Select the best n-1 edges from the generated undirected paths
+def generate_edge_set_ORIGINAL(edges, tour_edges, city_degrees):
+    # Iteratively add the next closest city to the tour
+    while len(tour_edges) < num_cities:
+        # Select the shortest path as the next city
+        if not edges:
+            break
+        shortest_path = edges[0]
+
+        # Remove the shortest path from the list of edges
+        edges = [edge for edge in edges if edge != shortest_path]
+
+        # Check the ege won't break the cycle
+        # It must connect to one of the nodes in the path with degree 1
+        if len(tour_edges) != num_cities - 2:
+            validEdge = False
+            for city in tour_edges:
+                if city_degrees[city[0]] == 1:
+                    if shortest_path[0] == city[0] or shortest_path[1] == city[0]:
+                        validEdge = True
+                elif city_degrees[city[1]] == 1:
+                    if shortest_path[0] == city[1] or shortest_path[1] == city[1]:
+                        validEdge = True
+
+        # For both cities in the path, check if their degree is no more than 2
+        if city_degrees[shortest_path[0]] < 2 and city_degrees[shortest_path[1]] < 2 and validEdge:
+            # If so, this is a valid path; add it to the edge set
+            tour_edges.append(shortest_path)
+
+            # Increment the degree of each city in the path
+            city_degrees[shortest_path[0]] += 1
+            city_degrees[shortest_path[1]] += 1
+
+    return tour_edges
+
+
+def generate_edge_set_OLD(edges, tour_edges, city_degrees, shortest_path):
+    # Iteratively add the next closest city to the tour
+    while len(tour_edges) < num_cities:
+        # Find the cheapest edge that connects the previous city (edges is sorted)
+        print("current tour edges: ", tour_edges)
+        for edge in edges:
+            if edge[0] == shortest_path[1] or edge[1] == shortest_path[1]:
+                shortest_path = edge
+                break
+
+        # Remove the shortest path from the list of edges
+        edges = [edge for edge in edges if edge != shortest_path]
+
+        # For both cities in the path, check if their degree is no more than 2
+        if city_degrees[shortest_path[0]] < 2 and city_degrees[shortest_path[1]] < 2:
+            print("hi")
+            # If so, this is a valid path; add it to the edge set
+            tour_edges.append(shortest_path)
+
+            # Increment the degree of each city in the path
+            city_degrees[shortest_path[0]] += 1
+            city_degrees[shortest_path[1]] += 1
+
+    return tour_edges
+
+
+def generate_edge_set(edges, tour_edges, city_degrees, shortest_path):
+    # Keep track of visited cities
+    visited_cities = set()
+
+    while len(tour_edges) < num_cities:
+        # Find the cheapest edge that connects to the previous city (edges is sorted)
+        print("current tour edges: ", tour_edges)
+        print("current visited cities: ", visited_cities)
+        found_shortest_path = False
+        for edge in edges:
+            if edge[0] == shortest_path[1] and edge[1] not in visited_cities:
+                shortest_path = edge
+                found_shortest_path = True
+                break
+            elif edge[1] == shortest_path[1] and edge[0] not in visited_cities:
+                shortest_path = edge
+                found_shortest_path = True
+                break
+
+        if not found_shortest_path:
+            print("No valid shortest path found")
+            break  # No valid shortest path found, exit the loop
+
+        # Remove the shortest path from the list of edges
+        edges = [edge for edge in edges if edge != shortest_path]
+
+        # Add the new city to the set of visited cities
+        visited_cities.add(shortest_path[1])
+
+        # Add the edge to the tour
+        tour_edges.append(shortest_path)
+
+        print("Edges left: ", edges)
+        print("Shortest path: ", shortest_path)
+
+    print("Final tour: ", tour_edges)
+    return tour_edges
+
+
+# Connect edges with neighbors to form a full tour
+def combine_tour_edges(first_place_id, tour_edges, city_degrees):
+    print("tour edges: ", tour_edges)
+    print("Number of edges: ", len(tour_edges))
+
+    # Mark the 1st vertex in the tour
+    city_degrees[first_place_id] -= 1
+
+    print("city degrees: ", city_degrees)
+
+    # Begin by adding the first city with degree 1 to the tour
+    end_edges = []
+    for edge in tour_edges:
+        if city_degrees[edge[0]] == 1:
+            end_edges.append(edge[0])
+    tour.append(end_edges[0])
+
+    # Track visited cities to construct a hamiltonian cycle
+    visited_cities = set()
+    visited_cities.add(tour[0])
+
+    # Iteravley connect each city to its parent
+    while len(tour) < num_cities - 1:
+        # Find the edge connected to the current city
+        # --------------------------------------------------------------------------------
+        # Trying to find an edge for 3, which has degree one so there are none
+        # want to add the edge with degree 1 last, as the last city in the tour
+        # --------------------------------------------------------------------------------
+        for edge in tour_edges:
+            if edge[1] == tour[-1]:
+                next_city = edge[0]
+            elif edge[0] == tour[-1]:
+                next_city = edge[1]
+            # Pass by any edges that don't connect to the parent city
+            else:
+                continue
+
+            # Ensure the next city doesn't violate the path constraints
+            if next_city not in visited_cities:
+                print("next city not in visited cities")
+                # If it doesn't, append it to the tour
+                tour.append(next_city)
+                visited_cities.add(next_city)
+
+            print("tour: ", tour)
+
+
 # Perform the 2-opt function to optmise the greedy tour
 def two_opt():
     global tour
@@ -399,7 +564,6 @@ def two_opt():
                 # Form another tour by reversing the order of 2 citys
                 new_tour = current_best_tour.copy()
                 new_tour[i:j] = new_tour[j - 1:i - 1:-1]
-
                 # Update if the new tour is found to be an improvment
                 if calculate_total_cost(new_tour) < calculate_total_cost(current_best_tour):
                     current_best_tour = new_tour
@@ -412,117 +576,46 @@ def two_opt():
     tour = current_best_tour
 
 
-# Function to sort the edges in ascending order of path cost
-def sort_edges():
-    edges = []
-
-    # Iterate over all pairs of vertices in the adjacency matrix
-    for x in range(len(dist_matrix)):
-        for y in range(len(dist_matrix[x])):
-            weight = dist_matrix[x][y]
-            # Add the new edge if it exists and if it's not a self-loop
-            if weight != 0 and x != y:
-                edges.append((x, y, weight))
-
-    # Sort the list of edges based on the weights
-    edges.sort(key=lambda cost: cost[2])
-
-    return edges
-
-
-# Define advanced greedy algorithm
-def Greedy_TSP():
+# Define enhanced greedy algorithm
+def Advanced_Greedy_TSP():
     # Specify global variables to be modified
     global tour
 
-    # Sort the edges in ascending order
-    edges = sort_edges()
+    # Define lists to track the edges and the degree of each city
+    city_degrees = [0] * num_cities
+    tour_edges = []
 
-    # ENCHANCEMENT 1A
-    # Shuffle the first 10 edges to avoid always selecting the same path
-    random.shuffle(edges[:10])
+    # Sort the edges in ascending order (assuming edges are already sorted)
+    edges = sort_upper_edges()
+    print("edges: ", edges)
 
     # Select the shortest path as the first city
-    shortest_edge = edges[0]
+    shortest_path = edges[0]
 
-    # Add the first city to the tour
-    tour.append(shortest_edge[0])
-    tour.append(shortest_edge[1])
+    # Add the first city to the tour and increment its degree
+    tour_edges.append(shortest_path)
+    first_place_id = shortest_path[0]
+    city_degrees[first_place_id] += 2
+    city_degrees[shortest_path[1]] += 1
 
-    # Remove the first edge from the edge list
-    edges = [edge for edge in edges if edge[0] != tour[0] and edge[1] != tour[0]]
+    # Remove the shortest path from the list of edges
+    edges = [edge for edge in edges if edge != shortest_path]
 
-    # Iteratively add the next closest city to the tour
-    while len(tour) < num_cities:
-        # Get the edges connected to the last city in the tour
-        connected_edges = [edge for edge in edges if edge[0] == tour[-1]]
+    # Generate the edge set
+    tour_edges = generate_edge_set(edges, tour_edges, city_degrees, shortest_path)
 
-        # Skip if no connected edges
-        if not connected_edges:
-            continue
+    # Build the edges into a tour
+    combine_tour_edges(first_place_id, tour_edges, city_degrees)
 
-        # Select the minimum edge cost amongst those cities
-        shortest_edge = min(connected_edges, key=lambda cost: cost[2])
-
-        # Remove all instances of the parent city from tour
-        edges = [edge for edge in edges if edge[0] != tour[-1] and edge[1] != tour[-1]]
-
-        # Add the new city to the tour
-        tour.append(shortest_edge[1])
-
-    # ENHANCEMENT 2
-    # Finally, refine the tour using 2-opt
+    # Finally, refine the tour with 2-opt algorithm
     two_opt()
-
-
-# ENCHANCEMENT 1A
-# Function to perform multiple restarts of the greedy algorithm
-def multiple_restarts():
-    # Set the varaibles to track the tour results
-    global tour
-    ultimate_tour = None
-    ultimate_length = float('inf')
-
-    # Select the number of restarts with regards to tour size
-    num_restarts = select_num_restarts()
-
-    # Iterativly run the greedy algorithm and select the best score amongst the results
-    for restart in range(num_restarts):
-        tour = []
-        Greedy_TSP()
-        current_tour_size = calculate_total_cost(tour)
-
-        if current_tour_size < ultimate_length:
-            ultimate_tour = tour
-            ultimate_length = current_tour_size
-
-    # Set the global tour to the best tour found from multiple restarts
-    tour = ultimate_tour
-
-
-# ENCHANCMENT 1B
-# Function to set the number of restarts depending on size of tour to construct
-# This prevents the algorithm from running for too long on large tours
-def select_num_restarts():
-    if num_cities < 25:
-        return 10
-    elif num_cities < 50:
-        return 5
-    elif num_cities < 100:
-        return 3
-    elif num_cities < 150:
-        return 2
-    else:
-        return 1
 
 
 def main():
     global tour_length
+
     print("Running Basic Greedy algorithm...")
-
-    # Call the algorithm that repeatdly runs the greedy algorithm and searches for the best tour amongst the results
-    multiple_restarts()
-
+    Advanced_Greedy_TSP()
     print("Greedy algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
