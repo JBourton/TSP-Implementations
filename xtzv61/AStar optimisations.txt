@@ -1,6 +1,0 @@
-The first optimisation was in the heuristic function to find the MST (Minimum Spanning Tree).
-The fringe here was pruned by keeping a log of all cities in the MST.
-Each edge was iterated through, and before adding each city to the fringe, it was compared with the MST to see
-if it was already present.
-
-The start node was changed to be [either random / last node of MST]

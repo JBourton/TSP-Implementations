@@ -157,7 +157,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile058.txt"
+input_file = "AISearchfile180.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -386,14 +386,14 @@ def get_path_cost(tour, total_cities=num_cities):
 def fill_remaining_cities():
     global tour
 
-    # Create a collection of city ids to add onto the end of the tour
-    remaining = set(range(num_cities))
-    remaining = remaining - set(tour)
-    unvisted_ids = list(remaining)
+    # Create a list of city ids to add onto the end of the tour
+    remaining = [city_id for city_id in range(num_cities) if city_id not in tour]
 
-    # Add these remaining cities in a random order
-    while len(tour) < num_cities:
-        tour += random.sample(unvisted_ids, len(unvisted_ids))
+    # Randomly shuffle the remaining citys
+    random.shuffle(remaining)
+
+    # Then append them to the tour
+    tour += remaining
 
 
 # Calculate the MST from a given node
@@ -428,13 +428,12 @@ def prims_heuristic(start_city, unvisited):
 def IDAStarTSP():
     global tour
 
-    # Start the timer to ensure algorithm runtime doesn't exceed 60 seconds
-    # alg_time = time.time()
-
     # Set initial depth limit
     depth_limit = 0
 
-    first_city_id = random.randint(0, num_cities - 1)
+    first_city_id = 0
+    # To set a random start city, uncomment the following line
+    # first_city_id = random.randint(0, num_cities - 1)
 
     while True:
         # Reset all tour variables for each iteration
@@ -458,7 +457,7 @@ def IDAStarTSP():
         while unvisited:
             # Check the algorithm runtime is within allowable bounds
             run_time = time.time() - start_time
-            if run_time > 56.5:
+            if run_time > 53:
                 # Fill the remainder of the tour with random cities
                 fill_remaining_cities()
                 break
@@ -517,11 +516,11 @@ def main():
     print("Running A* algorithm...")
     IDAStarTSP()
     print("A* algorithm complete!\n")
-    print(f"Completed tour: {tour}")
+    # print(f"Completed tour: {tour}")
 
     # Determine length of calculated tour
     tour_length = get_path_cost(tour)
-    print(f"Tour length: {tour_length}")
+    # print(f"Tour length: {tour_length}")
 
 
 # Commence A* algorithm by calling main

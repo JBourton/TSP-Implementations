@@ -157,7 +157,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile175.txt"
+input_file = "AISearchfile058.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -516,11 +516,11 @@ def main():
     multiple_restarts()
 
     print("Greedy algorithm complete!\n")
-    print(f"Completed tour: {tour}")
+    # print(f"Completed tour: {tour}")
 
     # Determine length of calculated tour
     tour_length = sum(dist_matrix[tour[x]][tour[x + 1]] for x in range(num_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
-    print(f"Tour length: {tour_length}")
+    # print(f"Tour length: {tour_length}")
 
 
 # Commence Greedy algorithm by calling main
