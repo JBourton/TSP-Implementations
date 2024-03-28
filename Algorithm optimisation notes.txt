@@ -1,7 +1,0 @@
-Randomise start city for basic greedy search
-
-For MST, when multiple nodes exist with the same cost, it may be possible to choose a better one out of them
-
-For greedy algorithm:
-- 2-OP method
-- When sorting edges, traverse the upper triangular part only, not the entire matrix
