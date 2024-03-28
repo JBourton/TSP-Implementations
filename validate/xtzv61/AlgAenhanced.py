@@ -157,7 +157,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile535.txt"
+input_file = "AISearchfile058.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -329,7 +329,7 @@ start_time = time.time()
 ############
 ############ END OF SECTOR 8 (IGNORE THIS COMMENT)
 
-added_note = ""
+added_note = "Enhancement 1 is found in the prims_heuristic() function. Enhancement 2 in the IDAStarTSP() function."
 
 ############ START OF SECTOR 9 (IGNORE THIS COMMENT)
 ############
@@ -353,7 +353,6 @@ added_note = ""
 ############ TOUR-FILE PRODUCED BY THIS CODE.
 ############
 ############ END OF SECTOR 9 (IGNORE THIS COMMENT)
-
 
 # Set reserved variables
 tour = []
@@ -396,9 +395,9 @@ def fill_remaining_cities():
         tour += random.sample(unvisted_ids, len(unvisted_ids))
 
 
-# ENHANCEMENT 2
-# MST heuristic (Prim's algorithm) with pruning applied
-def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
+# ENHANCEMENT 1
+# MST heuristic (Prim's algorithm) with option to return MST or its heuristic cost
+def prims_heuristic(start_city, unvisited, wantHeuristic=True):
     # Heuristic cost is nil if all cities visited
     if not unvisited:
         return 0 if wantHeuristic else start_city.city_id
@@ -416,8 +415,6 @@ def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
     # Produce MST
     while heap:
         weight, city_x_id, city_y_id = heapq.heappop(heap)
-        # ENHANCMENT 2
-        # Heap is pruned by skipping edge if already in MST
         if city_y_id not in MST:
             MST.add(city_y_id)
             last_added_city = city_y_id
@@ -426,8 +423,10 @@ def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
                 if next_city not in MST:
                     heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
         else:
+            # Prune the heap by skipping over any citys already in the MST
             continue
 
+    # ENHANCEMENT 1 continued
     # Return the length of the MST for heuristic cost
     if wantHeuristic:
         # Calculate the sum of each MST edge
@@ -450,14 +449,15 @@ def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
 def IDAStarTSP():
     global tour
 
-    # Start the timer to ensure algorithm runtime doesn't exceed 60 seconds
-    alg_time = time.time()
-
-    # ENHANCEMENT 2
+    # ENHANCEMENT 1
     # Pick starting city as the last city in the MST
     city_zero = City(0, 0, 0, 0)
     unvisited = set(range(num_cities))
-    starting_city_id = pruned_prims_heuristic(city_zero, unvisited, False)
+    starting_city_id = prims_heuristic(city_zero, unvisited, False)
+
+    # ENHANCEMENT 2 (more details below in the second while loop)
+    # Create a memoisation dictionary for MST hueristic values
+    mst_heuristic_memo = {}
 
     # Set initial depth limit
     depth_limit = 0
@@ -483,7 +483,7 @@ def IDAStarTSP():
         pruned_cities = []
         while unvisited:
             # Check the algorithm runtime is within allowable bounds
-            run_time = time.time() - alg_time
+            run_time = time.time() - start_time
             if run_time > 56.5:
                 # Fill the remainder of the tour with random cities
                 fill_remaining_cities()
@@ -499,8 +499,15 @@ def IDAStarTSP():
                     # Calculate the g(x) path cost from the root to the new city
                     new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
-                    # Add MST h(x) heuristic value
-                    new_city.heuristic_cost = pruned_prims_heuristic(new_city, unvisited)
+                    # ENHANCEMENT 2 continued
+                    # Memoise heuristic value if not currentley stored
+                    if (new_city.city_id, tuple(sorted(unvisited))) not in mst_heuristic_memo:
+                        mst_heuristic_memo[(new_city.city_id, tuple(sorted(unvisited)))] = prims_heuristic(new_city,
+                                                                                                       unvisited,
+                                                                                                       True)
+                    # ENHANCEMENT 2 continued
+                    # Fetch the memoised heuristic value
+                    new_city.heuristic_cost = mst_heuristic_memo[(new_city.city_id, tuple(sorted(unvisited)))]
 
                     # Calculate the f(x) total score (sum of g(x) and h(x))
                     new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
@@ -509,8 +516,6 @@ def IDAStarTSP():
                     if new_city.f_cost > depth_limit:
                         pruned_cities.append(new_city)
                         continue
-
-                    # Figure out what to do with pruned nodes here
 
                     # Replace the city in the fringe if it's already there
                     if new_city.city_id in fringe_set:
