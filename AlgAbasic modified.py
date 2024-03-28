@@ -10,7 +10,7 @@
 ############
 ############ DO NOT INCLUDE ANY COMMENTS ON A LINE WHERE YOU IMPORT A MODULE.
 ############
-
+import heapq
 import os
 import sys
 import time
@@ -293,7 +293,7 @@ my_last_name = "Bourton"
 ############
 ############ END OF SECTOR 7 (IGNORE THIS COMMENT)
 
-algorithm_code = "BG"
+algorithm_code = "IA"
 
 ############ START OF SECTOR 8 (IGNORE THIS COMMENT)
 ############
@@ -353,99 +353,178 @@ added_note = ""
 ############ TOUR-FILE PRODUCED BY THIS CODE.
 ############
 ############ END OF SECTOR 9 (IGNORE THIS COMMENT)
-
-# Define relevant data structures
+# Set reserved variables
 tour = []
 tour_length = 0
 
 
-# Function to calculate retrieve path cost between any 2 cities
-def get_path_cost(cityA, cityB):
-    path_cost = dist_matrix[cityA][cityB]
-    return path_cost
+# Representation of a city
+class City:
+    def __init__(self, city_id, path_cost, heuristic_cost, f_cost):
+        self.city_id = city_id
+        self.path_cost = path_cost
+        self.heuristic_cost = heuristic_cost
+        self.f_cost = f_cost
+
+    # Compare the path cost of 2 nodes by defining the < operator
+    def __lt__(self, second_city):
+        if self.f_cost < second_city.f_cost:
+            return True
+        else:
+            return False
 
 
-# A function which, given a path, calculates the cost of travelling along it
-def calculate_total_cost(path):
-    path_length = 0
-    # Get path cost for each pair of nodes
-    for i in range(0, len(path) - 1):
-        path_length += get_path_cost(path[i], path[i + 1])
-    return path_length
+# Function to return the cost of a given path
+def get_path_cost(tour, total_cities=num_cities):
+    cost = sum(dist_matrix[tour[x]][tour[x + 1]] for x in range(total_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
+    return cost
 
 
-# Function to sort the edges in ascending order of path cost
-def sort_edges():
-    edges = []
+# Calculate the MST from a given node
+def prims_heuristic(start_city, unvisited):
+    # Heuristic cost is nil if all cities visited
+    if not unvisited:
+        return 0
 
-    # Iterate over all pairs of vertices in the adjacency matrix
-    for x in range(len(dist_matrix)):
-        for y in range(len(dist_matrix[x])):
-            weight = dist_matrix[x][y]
-            # Add the new edge if it exists and if it's not a self-loop
-            if weight != 0 and x != y:
-                edges.append((x, y, weight))
+    MST = {start_city.city_id}
+    heap = []
 
-    # Sort the list of edges based on the weights
-    edges.sort(key=lambda cost: cost[2])
+    for city in unvisited:
+        heapq.heappush(heap, (dist_matrix[start_city.city_id][city], start_city.city_id, city))
 
-    return edges
+    while heap:
+        weight, city_x_id, city_y_id = heapq.heappop(heap)
+        if city_y_id not in MST:
+            MST.add(city_y_id)
+            for next_city in unvisited:
+                if next_city not in MST:
+                    heapq.heappush(heap, (dist_matrix[city_y_id][next_city], city_y_id, next_city))
+
+    # Calculate the sum of each MST edge
+    MST_Cost = sum(dist_matrix[city_x][city_y] for city_x in MST for city_y in MST if city_x != city_y) / 2
+    return MST_Cost
 
 
-# Define basic greedy algorithm
-def Greedy_TSP():
-    # Specify global variables to be modified
+# A function which, given a partially completed tour, will add the remaining cities in a random order
+def fill_remaining_cities():
     global tour
 
-    # Sort the edges in ascending order
-    edges = sort_edges()
+    # Create a collection of city ids to add onto the end of the tour
+    remaining = set(range(num_cities))
+    remaining = remaining - set(tour)
+    unvisted_ids = list(remaining)
 
-    # Select the shortest path as the first city
-    shortest_edge = edges[0]
-
-    # Add the first city to the tour
-    tour.append(shortest_edge[0])
-    tour.append(shortest_edge[1])
-
-    # Remove the first edge from the edge list
-    edges = [edge for edge in edges if edge[0] != tour[0] and edge[1] != tour[0]]
-
-    # Iteratively add the next closest city to the tour
+    # Add these remaining cities in a random order
     while len(tour) < num_cities:
-        # Get the edges connected to the last city in the tour
-        connected_edges = [edge for edge in edges if edge[0] == tour[-1]]
+        tour += random.sample(unvisted_ids, len(unvisted_ids))
 
-        # Skip if no connected edges
-        if not connected_edges:
-            continue
 
-        # Select the minimum edge cost amongst those cities
-        shortest_edge = min(connected_edges, key=lambda cost: cost[2])
+# Define basic A* algorithm with iterative deepening
+def IDAStarTSP():
+    global tour
 
-        # Remove all instances of the parent city from tour
-        edges = [edge for edge in edges if edge[0] != tour[-1] and edge[1] != tour[-1]]
+    # Start the timer to ensure algorithm runtime doesn't exceed 60 seconds
+    alg_time = time.time()
 
-        # Add the new city to the tour
-        tour.append(shortest_edge[1])
+    # Set initial depth limit
+    depth_limit = 0
+
+    first_city_id = random.randint(0, num_cities - 1)
+
+    while True:
+        # Reset all tour variables for each iteration
+        tour = []
+
+        # Define unvisited cities
+        unvisited = set(range(num_cities))
+        fringe = []
+
+        # Create representation of starting city
+        current_city = City(first_city_id, 0, 0, 0)
+
+        # Add starting city to fringe
+        heapq.heappush(fringe, current_city)
+
+        # Create log of fringe cities
+        fringe_set = {current_city.city_id}
+
+        # Explore the fringe until a valid Hamiltonian Cycle is discovered or depth limit is reached
+        pruned_cities = []
+        while unvisited:
+            # Check the algorithm runtime is within allowable bounds
+            run_time = time.time() - alg_time
+            if run_time > 57:
+                # Fill the remainder of the tour with random cities
+                fill_remaining_cities()
+                break
+
+            # Push all neighbours of current city to the fringe
+            for city in unvisited:
+                # Check that each unvisited city has a connection to the current city
+                if dist_matrix[city][current_city.city_id] != 0:
+                    # Create a new city object for each neighbour
+                    new_city = City(city, 0, 0, 0)
+
+                    # Calculate the g(x) path cost from the root to the new city
+                    new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
+
+                    # Add MST h(x) heuristic value
+                    new_city.heuristic_cost = prims_heuristic(new_city, unvisited)
+
+                    # Calculate the f(x) total score (sum of g(x) and h(x))
+                    new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
+
+                    # Prune nodes with f-score > depth limit
+                    if new_city.f_cost > depth_limit:
+                        pruned_cities.append(new_city)
+                        continue
+
+                    # Figure out what to do with pruned nodes here
+
+                    # Replace the city in the fringe if it's already there
+                    if new_city.city_id in fringe_set:
+                        fringe = [city for city in fringe if city.city_id != new_city.city_id]
+                        fringe_set.remove(new_city.city_id)
+
+                    # Add the new city to the fringe
+                    heapq.heappush(fringe, new_city)
+                    fringe_set.add(new_city.city_id)
+
+            # Append the city with the lowest f-score to the tour
+            if fringe:
+                current_city = heapq.heappop(fringe)
+                tour.append(current_city.city_id)
+            else:
+                break
+
+            unvisited.remove(current_city.city_id)
+
+        # An IDA* search up to the current depth limit has now been performed
+        # Conclude if a full tour was discovered
+        if len(tour) == num_cities:
+            break
+
+        # If not, increase depth limit for the next iteration
+        depth_limit = min(city.f_cost for city in pruned_cities)
 
 
 def main():
     global tour_length
-    global tour
 
-    print("Running Basic Greedy algorithm...")
-    Greedy_TSP()
-    print("Greedy algorithm complete!\n")
+    print("Running A* algorithm...")
+    IDAStarTSP()
+    print("A* algorithm complete!\n")
     print(f"Completed tour: {tour}")
 
     # Determine length of calculated tour
-    tour_length = sum(dist_matrix[tour[x]][tour[x + 1]] for x in range(num_cities - 1)) + dist_matrix[tour[-1]][tour[0]]
+    tour_length = get_path_cost(tour)
     print(f"Tour length: {tour_length}")
 
 
-# Commence Greedy algorithm by calling main
+# Commence A* algorithm by calling main
 if __name__ == "__main__":
     main()
+
 
 
 ############ START OF SECTOR 10 (IGNORE THIS COMMENT)

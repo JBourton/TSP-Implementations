@@ -157,7 +157,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile175.txt"
+input_file = "AISearchfile535.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -382,6 +382,20 @@ def get_path_cost(tour, total_cities=num_cities):
     return cost
 
 
+# A function which, given a partially completed tour, will add the remaining cities in a random order
+def fill_remaining_cities():
+    global tour
+
+    # Create a collection of city ids to add onto the end of the tour
+    remaining = set(range(num_cities))
+    remaining = remaining - set(tour)
+    unvisted_ids = list(remaining)
+
+    # Add these remaining cities in a random order
+    while len(tour) < num_cities:
+        tour += random.sample(unvisted_ids, len(unvisted_ids))
+
+
 # ENHANCEMENT 2
 # MST heuristic (Prim's algorithm) with pruning applied
 def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
@@ -436,6 +450,9 @@ def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
 def IDAStarTSP():
     global tour
 
+    # Start the timer to ensure algorithm runtime doesn't exceed 60 seconds
+    alg_time = time.time()
+
     # ENHANCEMENT 2
     # Pick starting city as the last city in the MST
     city_zero = City(0, 0, 0, 0)
@@ -465,6 +482,13 @@ def IDAStarTSP():
         # Explore the fringe until a valid Hamiltonian Cycle is discovered or depth limit is reached
         pruned_cities = []
         while unvisited:
+            # Check the algorithm runtime is within allowable bounds
+            run_time = time.time() - alg_time
+            if run_time > 56.5:
+                # Fill the remainder of the tour with random cities
+                fill_remaining_cities()
+                break
+
             # Push all neighbours of current city to the fringe
             for city in unvisited:
                 # Check that each unvisited city has a connection to the current city

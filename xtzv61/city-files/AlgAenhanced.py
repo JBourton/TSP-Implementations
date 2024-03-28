@@ -167,7 +167,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############
 ############ END OF SECTOR 0 (IGNORE THIS COMMENT)
 
-input_file = "AISearchfile175.txt"
+input_file = "AISearchfile058.txt"
 
 ############ START OF SECTOR 1 (IGNORE THIS COMMENT)
 ############
@@ -440,6 +440,11 @@ def pruned_prims_heuristic(start_city, unvisited, wantHeuristic=True):
     else:
         return last_added_city
 
+# Dynamic Heuristic Update
+def update_heuristic(current_city, unvisited):
+    # Example: Update the heuristic based on the number of unvisited cities
+    return pruned_prims_heuristic(current_city, unvisited) * len(unvisited) / num_cities
+
 
 # Define enchanced A* algorithm with iterative deepening
 def IDAStarTSP():
@@ -484,7 +489,7 @@ def IDAStarTSP():
                     new_city.path_cost = current_city.path_cost + dist_matrix[current_city.city_id][city]
 
                     # Add MST h(x) heuristic value
-                    new_city.heuristic_cost = pruned_prims_heuristic(new_city, unvisited)
+                    new_city.heuristic_cost = update_heuristic(new_city, unvisited) # pruned_prims_heuristic(new_city, unvisited)
 
                     # Calculate the f(x) total score (sum of g(x) and h(x))
                     new_city.f_cost = new_city.heuristic_cost + new_city.path_cost
