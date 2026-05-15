@@ -1,6 +1,6 @@
 # TSP Implementations
 
-Python implementations of heuristic and informed-search approaches for the Travelling Salesman Problem. This project was built for an algorithms coursework setting, using a provided validation harness and city-file format, with the core work focused on designing and improving search strategies for producing valid tours under runtime constraints.
+This repo holds my python implementations of heuristic and informed-search approaches for solving the Travelling Salesman Problem. I built this project as part of an "AI search" module at Durham University, using a provided validation harness and city-file format, with the core work focused on designing and improving search strategies for producing valid tours under runtime constraints.
 
 ## What It Shows
 
@@ -27,12 +27,6 @@ python AlgBenhanced.py AISearchfile058.txt
 ```
 
 The coursework harness expects the city files and `alg_codes_and_tariffs.txt` to sit in the parent directory structure used by the original assignment. When run with the expected inputs, each script writes a validated tour file containing the generated route, tour length, and runtime note.
-
-## Tech
-
-- Python 3
-- Standard library only
-- Graph algorithms, heuristic search, greedy optimisation, and local search
 
 ## Why This Project Matters
 
